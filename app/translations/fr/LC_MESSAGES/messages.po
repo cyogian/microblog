@@ -1,0 +1,279 @@
+# French translations for PROJECT.
+# Copyright (C) 2019 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2019-10-13 16:32+0530\n"
+"PO-Revision-Date: 2019-10-11 03:31+0530\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.7.0\n"
+
+#: app/__init__.py:19
+msgid "Please login to access this page."
+msgstr ""
+
+#: app/email.py:20
+msgid "[Microblog] Reset Your Password"
+msgstr ""
+
+#: app/email.py:30
+msgid "[Microblog] Verify Your Email"
+msgstr ""
+
+#: app/forms.py:8 app/forms.py:15 app/forms.py:31
+msgid "Username"
+msgstr ""
+
+#: app/forms.py:9 app/forms.py:17 app/forms.py:55
+msgid "Password"
+msgstr ""
+
+#: app/forms.py:10
+msgid "Remember Me"
+msgstr ""
+
+#: app/forms.py:11 app/templates/base.html:52
+msgid "Sign In"
+msgstr ""
+
+#: app/forms.py:16 app/forms.py:51
+msgid "Email"
+msgstr ""
+
+#: app/forms.py:18 app/forms.py:56
+msgid "Repeat Password"
+msgstr ""
+
+#: app/forms.py:19
+msgid "Register"
+msgstr ""
+
+#: app/forms.py:24 app/forms.py:43
+msgid "Please use a different username."
+msgstr ""
+
+#: app/forms.py:28
+msgid "Please use a different email address."
+msgstr ""
+
+#: app/forms.py:32
+msgid "About me"
+msgstr ""
+
+#: app/forms.py:33 app/forms.py:47
+msgid "Submit"
+msgstr ""
+
+#: app/forms.py:46
+msgid "Say something"
+msgstr ""
+
+#: app/forms.py:52 app/forms.py:57
+msgid "Request Password Reset"
+msgstr ""
+
+#: app/forms.py:60
+msgid "Resend Verification Email"
+msgstr ""
+
+#: app/routes.py:38
+msgid "Your post is now live!"
+msgstr ""
+
+#: app/routes.py:57
+msgid "Invalid username or password"
+msgstr ""
+
+#: app/routes.py:82
+msgid ""
+"Congratulations, you are now a registered user!\n"
+"An email containing the verification link has been sent to the email "
+"associated with this account."
+msgstr ""
+
+#: app/routes.py:94
+msgid ""
+"An email containing the verification link has been sent to the email "
+"associated with this account."
+msgstr ""
+
+#: app/routes.py:110
+msgid "Your account is successfully verified."
+msgstr ""
+
+#: app/routes.py:121
+msgid "Your account is successfully verified. Login to continue."
+msgstr ""
+
+#: app/routes.py:135
+msgid "Check your email for the instructions to reset your password."
+msgstr ""
+
+#: app/routes.py:150
+msgid "Your password has been reset."
+msgstr ""
+
+#: app/routes.py:175
+msgid "Your changes have been saved."
+msgstr ""
+
+#: app/routes.py:191
+#, python-format
+msgid "User %(username)s not found."
+msgstr ""
+
+#: app/routes.py:194
+msgid "U uh, You can not follow yourself!"
+msgstr ""
+
+#: app/routes.py:199
+#, python-format
+msgid "You are following %(username)s."
+msgstr ""
+
+#: app/routes.py:212
+msgid "U uh, You can not unfollow yourself!"
+msgstr ""
+
+#: app/routes.py:217
+#, python-format
+msgid "You are not following %(username)s anymore."
+msgstr ""
+
+#: app/translate.py:8
+msgid "Error: the translation service is not configured."
+msgstr ""
+
+#: app/translate.py:15
+msgid "Error: the translation service failed."
+msgstr ""
+
+#: app/templates/404.html:3
+msgid "Oops, looks like you are lost!"
+msgstr ""
+
+#: app/templates/404.html:6 app/templates/500.html:9
+msgid "Click here return to home page."
+msgstr ""
+
+#: app/templates/500.html:3
+msgid "Oops, an unexpected error has occurred!"
+msgstr ""
+
+#: app/templates/500.html:5
+msgid "The administrator has been notified. Sorry for the inconvenience!"
+msgstr ""
+
+#: app/templates/_post.html:18
+#, python-format
+msgid "%(username)s said %(when)s"
+msgstr ""
+
+#: app/templates/_post.html:34
+msgid "Translate"
+msgstr ""
+
+#: app/templates/base.html:42
+msgid "Home"
+msgstr ""
+
+#: app/templates/base.html:45
+msgid "Explore"
+msgstr ""
+
+#: app/templates/base.html:63
+msgid "Sign Out"
+msgstr ""
+
+#: app/templates/base.html:108
+msgid "Error: Could not contact server."
+msgstr ""
+
+#: app/templates/edit_profile.html:2
+msgid "Edit Profile"
+msgstr ""
+
+#: app/templates/email_verification_prompt.html:5
+msgid "Please Verify Your Account to Continue"
+msgstr ""
+
+#: app/templates/email_verification_prompt.html:11
+msgid "Looks like you have not verified your account."
+msgstr ""
+
+#: app/templates/email_verification_prompt.html:13
+msgid "An email with a verification link has been sent to your email-id."
+msgstr ""
+
+#: app/templates/email_verification_prompt.html:17
+msgid "Click on it to verify your account."
+msgstr ""
+
+#: app/templates/email_verification_prompt.html:18
+msgid "Not yet received the mail? Click below to resend it."
+msgstr ""
+
+#: app/templates/index.html:2
+#, python-format
+msgid "Hi, %(username)s!"
+msgstr ""
+
+#: app/templates/login.html:5
+msgid "Sign In to your Account"
+msgstr ""
+
+#: app/templates/login.html:42
+msgid "Forgot Password?"
+msgstr ""
+
+#: app/templates/login.html:42
+msgid "Click here to Reset it."
+msgstr ""
+
+#: app/templates/login.html:43
+msgid "New User?"
+msgstr ""
+
+#: app/templates/login.html:43
+msgid "Click to Register!"
+msgstr ""
+
+#: app/templates/register.html:4
+msgid "Create a New Account"
+msgstr ""
+
+#: app/templates/reset_password.html:4
+#: app/templates/reset_password_request.html:4
+msgid "Reset Password"
+msgstr ""
+
+#: app/templates/user.html:16
+msgid "Last seen on: "
+msgstr ""
+
+#: app/templates/user.html:27
+msgid "Unfollow"
+msgstr ""
+
+#: app/templates/user.html:34
+msgid "Follow"
+msgstr ""
+
+#: app/templates/user.html:44
+msgid "Edit your profile"
+msgstr ""
+
+#: app/templates/user.html:57
+msgid "No posts to show."
+msgstr ""
+

@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ _("Hi, %(username)s!",username=current_user.username) }}</h1>
+{% if form %}
+<div class="ui segment">
+  <form class="ui form" action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="field">
+      {{ form.post.label }}
+      {{ form.post(cols=32, rows=4)}}
+      {% if form.post.errors %}
+      <div class="ui error message" style="display: inherit">
+        <ul class="list">
+          {% for error in form.post.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    <p>
+      {{ form.submit(class_="fluid ui button green") }}
+    </p>
+  </form>
+</div>
+{% endif %}
+<div
+  class="ui segment row"
+  style="justify-content: flex-start; padding-left: 1rem"
+>
+  <div class="ui middle aligned divided list" style="width: inherit; ">
+    {% for post in posts %} {% include "_post.html" %} {% endfor %}
+  </div>
+</div>
+<div class="ui borderless menu" style="justify-content: center;">
+  {% if prev_url %}
+  <a class="item" href="{{ prev_url }}"
+    ><i class="ui icon arrow circle left large"></i
+  ></a>
+  {% endif %}
+  <a class="item active"
+    ><b style="font-size: 1.5rem;">{{ currentPage }}</b></a
+  >
+  {% if next_url %}
+  <a class="item" href="{{ next_url }}"
+    ><i class="ui icon arrow circle right large"></i
+  ></a>
+  {% endif %}
+</div>
+{% endblock %}

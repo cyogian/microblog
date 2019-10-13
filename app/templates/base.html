@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    {% if title %}
+    <title>{{ title }} - MicroBlog</title>
+    {% else %}
+    <title>Welcome to MicroBlog!</title>
+    {% endif %}
+    <!-- CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+    />
+    <!-- CSS -->
+  </head>
+  <body>
+    <style>
+      #website {
+        font-size: 1.5rem;
+        background: black;
+        color: white;
+        padding: 0.5rem 1rem;
+        position: relative;
+        width: 100%;
+        box-shadow: 0 0 1px 1px grey;
+      }
+      .ui.secondary.menu {
+        margin-top: 0;
+      }
+      @media (max-width: 450px) {
+        #website {
+          text-align: center;
+        }
+      }
+    </style>
+    <div id="website">MicroBlog</div>
+    <div class="ui secondary menu">
+      <a class="item {{ currentHome }}" href="{{ url_for('index') }}">{{
+        _("Home")
+      }}</a>
+      <a class="item {{ currentExplore }}" href="{{ url_for('explore') }}">{{
+        _("Explore")
+      }}</a>
+
+      <div class="right menu" style="justify-content: space-around;">
+        {% if current_user.is_anonymous %}
+        <div class="item">
+          <a class="ui button primary" href="{{ url_for('login') }}">{{
+            _("Sign In")
+          }}</a>
+        </div>
+        {% else %}
+        <div class="item">
+          <a href="{{ url_for('user', username=current_user.username) }}"
+            ><i class="circular green large user icon"></i
+          ></a>
+        </div>
+        <div class="item">
+          <a class="ui button negative" href="{{ url_for('logout') }}">{{
+            _("Sign Out")
+          }}</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="ui container" style="margin: 1rem 0;">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="ui success message">
+        <i class="close icon"></i>
+        <ul class="list">
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+      $(".close.icon").on("click", function() {
+        $(this)
+          .parent()
+          .transition("fade");
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    {% block scripts %}
+    {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
+
+    <script>
+      function translate(sourceElem, destElem, sourceLang, destLang) {
+          $(destElem).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
+          $.post('/translate', {
+              text: $(sourceElem).text(),
+              source_language: sourceLang,
+              dest_language: destLang
+          }).done(function(response) {
+              let text = response.text
+              if(text["text"]){
+                text = text["text"]["0"]
+              }
+              $(destElem).text(text)
+          }).fail(function() {
+              $(destElem).text("{{ _('Error: Could not contact server.') }}");
+          });
+      }
+    </script>
+    {% endblock %}
+  </body>
+</html>

@@ -1,0 +1,40 @@
+<div class="item">
+  <div style="display: flex; padding: 0.5rem 0.1rem;">
+    <div
+      style="display: flex; justify-content: center; align-items: flex-start; min-width: 40px; min-height: 40px;"
+    >
+      <img
+        class="ui avatar image"
+        src="{{ post.author.avatar(36) }}"
+        style="border: 1px solid grey;"
+      />
+    </div>
+    <div style="align-self: flex-start;">
+      {% set user_link %}
+      <a href="{{ url_for('user', username=post.author.username) }}"
+        >{{ post.author.username }}
+      </a>
+      {% endset %}
+      {{ _("%(username)s said %(when)s", username=user_link, when=moment(post.timestamp).fromNow())}}
+      <div class="content" style="margin-top: 0.5rem;" id="post{{ post.id }}">
+        <b>{{ post.body }}</b>
+      </div>
+      {% if post.language and post.language != g.locale %}
+      <div
+        class="content"
+        style="margin-top: 1rem; background-color:whitesmoke; padding: 1rem;"
+        id="translation{{ post.id }}"
+      >
+        <a
+          href="javascript:translate(
+          '#post{{ post.id }}',
+          '#translation{{ post.id }}',
+          '{{ post.language }}',
+          '{{ g.locale }}');"
+          >{{ _("Translate") }}</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

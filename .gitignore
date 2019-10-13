@@ -1,0 +1,6 @@
+.flaskenv
+.vscode
+venv
+app.db
+
+logs
