@@ -15,7 +15,7 @@ app.config.from_object(Config)      # configuring app using Config object
 db = SQLAlchemy(app)                # flask-sqlalchemy : db-connector instance
 migrate = Migrate(app, db)          # flask-migrate : db migration engine
 login = LoginManager(app)           # flask-login : manages user login
-login.login_view = 'login'          # setting function which gets caller when login is required
+login.login_view = 'auth.login'          # setting function which gets caller when login is required
 login.login_message = _l("Please login to access this page.")
 mail= Mail(app)
 moment = Moment(app)

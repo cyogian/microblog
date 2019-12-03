@@ -1,9 +1,6 @@
-from flask_mail import Message
 from flask import render_template
-from app import mail, app
-from threading import Thread
 from flask_babel import lazy_gettext as _l
-
+from app.email import send_mail
 def send_password_reset_email(user):
     token = user.get_reset_password_token()
     send_mail(

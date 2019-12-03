@@ -9,8 +9,6 @@ from flask_babel import _, get_locale
 from guess_language import guess_language
 from flask import jsonify
 
-
-from app.email import send_password_reset_email, send_email_verification_email
 from app.translate import translate
 
 @app.before_request
@@ -26,7 +24,7 @@ def before_request():
 @login_required
 def index():
     if not current_user.is_verified:
-        return redirect(url_for("email_verification_prompt"))
+        return redirect(url_for("auth.email_verification_prompt"))
     form = PostForm()
     if form.validate_on_submit():
         language = guess_language(form.post.data)
@@ -46,117 +44,11 @@ def index():
 
     return render_template('index.html', title='Home', currentHome = 'active', posts=posts.items, form=form, prev_url=prev_url,next_url=next_url, currentPage=page)
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if current_user.is_authenticated:
-#         return redirect(url_for('index'))
-#     form = LoginForm()
-#     if form.validate_on_submit():
-#         user = User.query.filter_by(username=form.username.data).first()
-#         if user is None or not user.check_password(form.password.data):
-#             flash(_('Invalid username or password'))
-#             return redirect(url_for('login'))
-#         login_user(user, remember=form.remember_me.data)
-#         next_page = request.args.get('next')
-#         if not next_page or url_parse(next_page).netloc != '':
-#             next_page = url_for('index')
-#         return redirect(next_page)
-#     return render_template("login.html", title="Sign In", form = form)
-
-# @app.route('/logout')
-# def logout():
-#     logout_user()
-#     return redirect(url_for('index'))
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if current_user.is_authenticated:
-#         return redirect(url_for("index"))
-#     form = RegistrationForm()
-#     if form.validate_on_submit():
-#         user = User(username=form.username.data, email=form.email.data)
-#         user.set_password(form.password.data)
-#         db.session.add(user)
-#         db.session.commit()
-#         send_email_verification_email(user)
-#         flash(_("Congratulations, you are now a registered user!\nAn email containing the verification link has been sent to the email associated with this account."))
-#         return redirect(url_for('login'))
-#     return render_template("register.html", title="Register", form=form)
-
-# @app.route('/email_verification_prompt', methods=["GET", "POST"])
-# @login_required
-# def email_verification_prompt():
-#     if current_user.is_verified:
-#         return redirect(url_for("index"))
-#     form = EmailVerificationForm()
-#     if form.validate_on_submit():
-#         send_email_verification_email(current_user)
-#         flash(_("An email containing the verification link has been sent to the email associated with this account."))
-#         return redirect(url_for("email_verification_prompt"))
-#     return render_template("email_verification_prompt.html", title="Verify Your Account", form=form)
-    
-# @app.route('/verify_email/<token>')
-# def verify_email(token):
-#     if current_user.is_authenticated:
-#         if current_user.is_verified:
-#             return redirect(url_for("index"))
-#         user = User.verify_email_verification_token(token)
-#         if not user:
-#             return redirect(url_for("index"))
-#         if current_user == user:
-#             print("LEVEL 5")
-#             user.is_verified = True
-#             db.session.commit()
-#             flash(_("Your account is successfully verified."))
-#             return redirect(url_for("index"))
-#         return redirect(url_for("index"))
-        
-#     user = User.verify_email_verification_token(token)
-#     if not user:
-#         return redirect(url_for("index"))
-#     if user.is_verified:
-#         return redirect(url_for("index"))
-#     user.is_verified = True
-#     db.session.commit()
-#     flash(_("Your account is successfully verified. Login to continue."))
-#     return redirect(url_for("login"))
-       
-        
-
-# @app.route('/reset_password_request', methods=["GET", "POST"])
-# def reset_password_request():
-#     if current_user.is_authenticated:
-#         return redirect(url_for("index"))
-#     form = ResetPasswordRequestForm()
-#     if form.validate_on_submit():
-#         user = User.query.filter_by(email=form.email.data).first()
-#         if user:
-#             send_password_reset_email(user)
-#         flash(_("Check your email for the instructions to reset your password."))
-#         return redirect(url_for("login"))
-#     return render_template("reset_password_request.html", title="Reset Password", form=form)
-
-# @app.route('/reset_password/<token>', methods=["GET", "POST"])
-# def reset_password(token):
-#     if current_user.is_authenticated:
-#         return redirect(url_for("index"))
-#     user = User.verify_reset_password_token(token)
-#     if not user:
-#         return redirect(url_for("index"))
-#     form = ResetPasswordForm()
-#     if form.validate_on_submit():
-#         user.set_password(form.password.data)
-#         db.session.commit()
-#         flash(_("Your password has been reset."))
-#         return redirect(url_for("login"))
-#     return render_template('reset_password.html', title="Reset Password", form=form)
-
-
 @app.route('/user/<username>')
 @login_required
 def user(username):
     if not current_user.is_verified:
-        return redirect(url_for("email_verification_prompt"))
+        return redirect(url_for("auth.email_verification_prompt"))
     user = User.query.filter_by(username=username).first_or_404()
     posts = user.posts.order_by(Post.timestamp.desc())
 
@@ -166,7 +58,7 @@ def user(username):
 @login_required
 def edit_profile():
     if not current_user.is_verified:
-        return redirect(url_for("email_verification_prompt"))
+        return redirect(url_for("auth.email_verification_prompt"))
     form = EditProfileForm(current_user.username)
     if form.validate_on_submit():
         current_user.username = form.username.data
@@ -185,7 +77,7 @@ def edit_profile():
 @login_required
 def follow(username):
     if not current_user.is_verified:
-        return redirect(url_for("email_verification_prompt"))
+        return redirect(url_for("auth.email_verification_prompt"))
     user = User.query.filter_by(username=username).first()
     if user is None:
         flash(_('User %(username)s not found.', username=username))
@@ -203,7 +95,7 @@ def follow(username):
 @login_required
 def unfollow(username):
     if not current_user.is_verified:
-        return redirect(url_for("email_verification_prompt"))
+        return redirect(url_for("auth.email_verification_prompt"))
     user = User.query.filter_by(username=username).first()
     if user is None:
         flash('User %(username)s not found.', username=username)
@@ -221,7 +113,7 @@ def unfollow(username):
 @login_required
 def explore():
     if not current_user.is_verified:
-        return redirect(url_for("email_verification_prompt"))
+        return redirect(url_for("auth.email_verification_prompt"))
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
