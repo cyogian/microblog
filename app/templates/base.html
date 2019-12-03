@@ -38,19 +38,19 @@
     </style>
     <div id="website">MicroBlog</div>
     <div class="ui secondary menu">
-      <a class="item {{ currentHome }}" href="{{ url_for('index') }}">{{
-        _("Home")
-      }}</a>
-      <a class="item {{ currentExplore }}" href="{{ url_for('explore') }}">{{
-        _("Explore")
-      }}</a>
+      <a class="item {{ currentHome }}" href="{{ url_for('index') }}"
+        >{{ _("Home") }}</a
+      >
+      <a class="item {{ currentExplore }}" href="{{ url_for('explore') }}"
+        >{{ _("Explore") }}</a
+      >
 
       <div class="right menu" style="justify-content: space-around;">
         {% if current_user.is_anonymous %}
         <div class="item">
-          <a class="ui button primary" href="{{ url_for('login') }}">{{
-            _("Sign In")
-          }}</a>
+          <a class="ui button primary" href="{{ url_for('auth.login') }}"
+            >{{ _("Sign In") }}</a
+          >
         </div>
         {% else %}
         <div class="item">
@@ -59,9 +59,9 @@
           ></a>
         </div>
         <div class="item">
-          <a class="ui button negative" href="{{ url_for('logout') }}">{{
-            _("Sign Out")
-          }}</a>
+          <a class="ui button negative" href="{{ url_for('auth.logout') }}"
+            >{{ _("Sign Out") }}</a
+          >
         </div>
         {% endif %}
       </div>
@@ -87,9 +87,8 @@
       });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
-    {% block scripts %}
-    {{ moment.include_moment() }}
-    {{ moment.lang(g.locale) }}
+    {% block scripts %} {{ moment.include_moment() }} {{ moment.lang(g.locale)
+    }}
 
     <script>
       function translate(sourceElem, destElem, sourceLang, destLang) {

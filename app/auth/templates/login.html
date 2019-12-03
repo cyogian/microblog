@@ -39,8 +39,8 @@
         </div>
         {{ form.submit(class_="fluid ui button primary") }}
       </form>
-      <div>{{_("Forgot Password?")}} <a href="{{ url_for('reset_password_request') }}">{{_("Click here to Reset it.")}}</a></div>
-      <div>{{_("New User?")}} <a href="{{ url_for('register') }}">{{_("Click to Register!")}}</div>
+      <div>{{_("Forgot Password?")}} <a href="{{ url_for('auth.reset_password_request') }}">{{_("Click here to Reset it.")}}</a></div>
+      <div>{{_("New User?")}} <a href="{{ url_for('auth.register') }}">{{_("Click to Register!")}}</div>
     </div>
   </div>
 </div>
