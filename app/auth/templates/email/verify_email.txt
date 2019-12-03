@@ -1,0 +1,13 @@
+Dear {{ user.username }},
+
+To verify your email click on the following link:
+
+{{ url_for('verify_email', token=token, _external=True) }}
+
+If you have not created an account simply ignore this message.
+
+Note: This link will expire in 5 days.
+
+Sincerely,
+
+The Microblog Team
