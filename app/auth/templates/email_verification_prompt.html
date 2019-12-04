@@ -1,0 +1,22 @@
+{% extends "base.html" %} {% block content %}
+<div class="ui middle aligned center aligned grid">
+  <div style="max-width: 480px;">
+    <h1 style="text-align: center;">
+      {{ _("Please Verify Your Account to Continue") }}
+    </h1>
+    <div class="ui segment" style="max-width: 450px;">
+      <form class="ui form" action="" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+          {{ _("Looks like you have not verified your account.") }}<br />
+          {{ _( "An email with a verification link has been sent to your
+          email-id." ) }}<br />
+          {{ _("Click on it to verify your account.") }}<br />
+          {{ _("Not yet received the mail? Click below to resend it.") }}
+        </p>
+        {{ form.submit(class_="fluid ui button green") }}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
