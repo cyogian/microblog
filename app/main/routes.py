@@ -9,8 +9,9 @@ from guess_language import guess_language
 
 from app.translate import translate
 from . import bp
+from flask_babel import lazy_gettext as _l
 
-@bp.before_request
+@bp.before_app_request
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
@@ -40,7 +41,7 @@ def index():
     next_url = url_for('main.index', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.index', page=posts.prev_num) if posts.has_prev else None
 
-    return render_template('index.html', title='Home', currentHome = 'active', posts=posts.items, form=form, prev_url=prev_url,next_url=next_url, currentPage=page)
+    return render_template('index.html', title=_l('Home'), currentHome = 'active', posts=posts.items, form=form, prev_url=prev_url,next_url=next_url, currentPage=page)
 
 @bp.route('/user/<username>')
 @login_required
@@ -67,7 +68,7 @@ def edit_profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', title='Edit Profile',
+    return render_template('edit_profile.html', title=_l('Edit Profile'),
                            form=form)
 
 
@@ -118,7 +119,7 @@ def explore():
     next_url = url_for('main.explore', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.explore', page=posts.prev_num) if posts.has_prev else None
 
-    return render_template('index.html', title='Explore', posts=posts.items, currentExplore="active", next_url=next_url, prev_url=prev_url, currentPage=page)
+    return render_template('index.html', title=_l('Explore'), posts=posts.items, currentExplore="active", next_url=next_url, prev_url=prev_url, currentPage=page)
 
 @bp.route("/translate", methods=["POST"])
 def translate_text():

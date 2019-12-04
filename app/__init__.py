@@ -32,10 +32,11 @@ def create_app(config_class=Config):
 
     @babel.localeselector
     def get_locale():
-        try:
-            return request.accept_languages.best_match(app.config['LANGUAGES'])
-        except RuntimeError:
-            return "en"
+        return request.accept_languages.best_match(app.config['LANGUAGES'])
+        # try:
+        #     return request.accept_languages.best_match(app.config['LANGUAGES'])
+        # except RuntimeError:
+        #     return "en"
         # return 'en'
     
     if not app.debug and not app.testing:

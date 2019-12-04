@@ -7,6 +7,7 @@ from app.models import User
 from flask_login import current_user, logout_user, login_user, login_required
 from werkzeug.urls import url_parse
 from flask_babel import _
+from flask_babel import lazy_gettext as _l
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -24,7 +25,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)
-    return render_template("login.html", title="Sign In", form = form)
+    return render_template("login.html", title=_l("Sign In"), form = form)
 
 @bp.route('/logout')
 def logout():
@@ -44,7 +45,7 @@ def register():
         send_email_verification_email(user)
         flash(_("Congratulations, you are now a registered user!\nAn email containing the verification link has been sent to the email associated with this account."))
         return redirect(url_for('auth.login'))
-    return render_template("register.html", title="Register", form=form)
+    return render_template("register.html", title=_l("Register"), form=form)
 
 @bp.route('/email_verification_prompt', methods=["GET", "POST"])
 
@@ -57,7 +58,7 @@ def email_verification_prompt():
         send_email_verification_email(current_user)
         flash(_("An email containing the verification link has been sent to the email associated with this account."))
         return redirect(url_for("auth.email_verification_prompt"))
-    return render_template("email_verification_prompt.html", title="Verify Your Account", form=form)
+    return render_template("email_verification_prompt.html", title=_l("Verify Your Account"), form=form)
     
 @bp.route('/verify_email/<token>')
 def verify_email(token):
@@ -98,7 +99,7 @@ def reset_password_request():
             send_password_reset_email(user)
         flash(_("Check your email for the instructions to reset your password."))
         return redirect(url_for("auth.login"))
-    return render_template("reset_password_request.html", title="Reset Password", form=form)
+    return render_template("reset_password_request.html", title=_l("Reset Password"), form=form)
 
 @bp.route('/reset_password/<token>', methods=["GET", "POST"])
 def reset_password(token):
@@ -113,4 +114,4 @@ def reset_password(token):
         db.session.commit()
         flash(_("Your password has been reset."))
         return redirect(url_for("auth.login"))
-    return render_template('reset_password.html', title="Reset Password", form=form)
+    return render_template('reset_password.html', title=_l("Reset Password"), form=form)
