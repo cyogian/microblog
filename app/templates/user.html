@@ -22,14 +22,14 @@
         {% if current_user.is_following(user) %}
         <a
           class="ui button secondary"
-          href="{{ url_for('unfollow', username=user.username) }}"
+          href="{{ url_for('main.unfollow', username=user.username) }}"
         >
           {{ _("Unfollow") }}
         </a>
         {% else %}
         <a
           class="ui button primary"
-          href="{{ url_for('follow', username=user.username)  }}"
+          href="{{ url_for('main.follow', username=user.username)  }}"
         >
           {{ _("Follow") }}
         </a>
@@ -39,7 +39,7 @@
     </div>
     {% if user == current_user %}
     <div class="extra content">
-      <a href="{{ url_for('edit_profile') }}">
+      <a href="{{ url_for('main.edit_profile') }}">
         <i class="edit icon"></i>
         {{ _("Edit your profile") }}
       </a>

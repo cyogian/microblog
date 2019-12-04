@@ -4,9 +4,8 @@
   <form class="ui form" action="" method="POST">
     {{ form.hidden_tag() }}
     <div class="field">
-      {{ form.username.label }}
-      {{ form.username(size=32) }}
-      {% if form.username.errors %}
+      {{ form.username.label }} {{ form.username(size=32) }} {% if
+      form.username.errors %}
       <div class="ui error message" style="display: inherit">
         <ul class="list">
           {% for error in form.username.errors %}
@@ -17,9 +16,8 @@
       {% endif %}
     </div>
     <div class="field">
-      {{ form.about_me.label }}
-      {{ form.about_me(cols=50, rows=4) }}
-      {% if form.about_me.errors %}
+      {{ form.about_me.label }} {{ form.about_me(cols=50, rows=4) }} {% if
+      form.about_me.errors %}
       <div class="ui error message" style="display: inherit">
         <ul class="list">
           {% for error in form.about_me.errors %}

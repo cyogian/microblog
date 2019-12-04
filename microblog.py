@@ -1,5 +1,8 @@
-from app import app, db, cli
+from app import create_app, db, cli
 from app.models import User, Post
+from flask import redirect, url_for, g
+app = create_app()
+cli.register(app)
 
 @app.shell_context_processor
 def make_shell_context():

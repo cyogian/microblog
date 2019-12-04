@@ -2,9 +2,9 @@
 <div class="ui negative message">
   <h1>404: {{ _("Oops, looks like you are lost!") }}</h1>
   <p>
-    <a href="{{ url_for('index') }}">{{
-      _("Click here return to home page.")
-    }}</a>
+    <a href="{{ url_for('main.index') }}"
+      >{{ _("Click here return to home page.") }}</a
+    >
   </p>
 </div>
 {% endblock %}
