@@ -35,6 +35,21 @@
           text-align: center;
         }
       }
+      #search-box-2 {
+        display: none;
+      }
+      @media (max-width: 600px) {
+        #search-box-1 {
+          display: none;
+        }
+        #search-box-2 {
+          display: block;
+          text-align: center;
+        }
+        #search-box-2 .ui.icon.input {
+          width: 90%;
+        }
+      }
     </style>
     <div id="website">MicroBlog</div>
     <div class="ui secondary menu">
@@ -45,7 +60,11 @@
         >{{ _("Explore") }}</a
       >
 
-      <div class="right menu" style="justify-content: space-around;">
+      <div
+        class="right menu"
+        id="right-menu"
+        style="justify-content: space-around;"
+      >
         {% if current_user.is_anonymous %}
         <div class="item">
           <a class="ui button primary" href="{{ url_for('auth.login') }}"
@@ -63,8 +82,37 @@
             >{{ _("Sign Out") }}</a
           >
         </div>
-        {% endif %}
+        {% if g.search_form %}
+        <div class="item" id="search-box-1">
+          <form
+            class="ui search"
+            method="get"
+            action="{{ url_for('main.search') }}"
+          >
+            <div class="ui icon input">
+              {{ g.search_form.q(size=20, class='prompt',
+              placeholder=g.search_form.q.label.text) }}
+              <i class="search icon"></i>
+            </div>
+          </form>
+        </div>
+        {% endif %} {% endif %}
       </div>
+    </div>
+    <div id="search-box-2">
+      {% if g.search_form %}
+      <form
+        class="ui search"
+        method="get"
+        action="{{ url_for('main.search') }}"
+      >
+        <div class="ui icon input">
+          {{ g.search_form.q(size=20, class='prompt',
+          placeholder=g.search_form.q.label.text) }}
+          <i class="search icon"></i>
+        </div>
+      </form>
+      {% endif %}
     </div>
     <div class="ui container" style="margin: 1rem 0;">
       {% with messages = get_flashed_messages() %} {% if messages %}
