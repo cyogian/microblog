@@ -135,6 +135,71 @@
       });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <script src="{{url_for('static', filename='popover.min.js')}}"></script>
+    <script>
+      document.addEventListener("click", function(e) {
+        x = $(".fu_popover_default");
+        if (x.length) {
+          x[0].remove();
+        }
+      });
+      $(function() {
+        var timer = null;
+        $(".user_popup").hover(
+          function(event) {
+            // mouse in event handler
+            x = $(".fu_popover_default");
+            if (x.length) {
+              x[0].remove();
+            }
+            var elem = $(event.currentTarget);
+            timer = setTimeout(function() {
+              timer = null;
+              xhr = $.ajax(
+                "/user/" +
+                  elem
+                    .first()
+                    .text()
+                    .trim() +
+                  "/popup"
+              ).done(function(data) {
+                xhr = null;
+                elem
+                  .fu_popover({
+                    trigger: "manual",
+                    html: true,
+                    animation: false,
+                    container: elem,
+                    content: data,
+                    width: "220px",
+                    placement: "right"
+                  })
+                  .fu_popover("show");
+                flask_moment_render_all();
+              });
+            }, 1000);
+          },
+          function(event) {
+            // mouse out event handler
+            var elem = $(event.currentTarget);
+            if (timer) {
+              clearTimeout(timer);
+              timer = null;
+            } else if (xhr) {
+              xhr.abort();
+              xhr = null;
+            } else {
+              x = $(".fu_popover_default");
+              if (x.length) {
+                x[0].addEventListener("click", function(e) {
+                  e.stopPropagation();
+                });
+              }
+            }
+          }
+        );
+      });
+    </script>
     {% block scripts %} {{ moment.include_moment() }} {{ moment.lang(g.locale)
     }}
 

@@ -11,9 +11,11 @@
     </div>
     <div style="align-self: flex-start;">
       {% set user_link %}
-      <a href="{{ url_for('main.user', username=post.author.username) }}"
-        >{{ post.author.username }}
-      </a>
+      <span class="user_popup" id="popup_{{ post.id }}">
+        <a href="{{ url_for('main.user', username=post.author.username) }}"
+          >{{ post.author.username }}
+        </a>
+      </span>
       {% endset %} {{ _("%(username)s said %(when)s", username=user_link,
       when=moment(post.timestamp).fromNow())}}
       <div class="content" style="margin-top: 0.5rem;" id="post{{ post.id }}">

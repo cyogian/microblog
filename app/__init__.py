@@ -25,7 +25,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
-    migrate.init_app(app)
+    migrate.init_app(app, db)
     login.init_app(app)
     mail.init_app(app)
     moment.init_app(app)
@@ -33,14 +33,15 @@ def create_app(config_class=Config):
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
 
-    @babel.localeselector
-    def get_locale():
-        try:
-            return request.accept_languages.best_match(app.config['LANGUAGES'])
-        except RuntimeError:
-            return "en"
-        # return 'en'
-    
+    if not babel.locale_selector_func:
+        @babel.localeselector
+        def get_locale():
+            try:
+                return request.accept_languages.best_match(app.config['LANGUAGES'])
+            except RuntimeError:
+                return "en"
+            # return 'en'
+
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
             auth = None
