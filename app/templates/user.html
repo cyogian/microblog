@@ -35,6 +35,15 @@
         </a>
         {% endif %}
       </div>
+      <div class="ui segment">
+        <a
+          class="positive ui fluid button "
+          href="{{ url_for('main.send_message',
+                              recipient=user.username) }}"
+        >
+          {{ _('Send private message') }}
+        </a>
+      </div>
       {% endif %}
     </div>
     {% if user == current_user %}

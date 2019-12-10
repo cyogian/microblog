@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ _("Messages") }}</h1>
+<div
+  class="ui segment row"
+  style="justify-content: flex-start; padding-left: 1rem"
+>
+  <div class="ui middle aligned divided list" style="width: inherit; ">
+    {% for post in messages %} {% include "_post.html" %} {% endfor %}
+  </div>
+</div>
+<div class="ui borderless menu" style="justify-content: center;">
+  {% if prev_url %}
+  <a class="item" href="{{ prev_url }}"
+    ><i class="ui icon arrow circle left large"></i> Newer Messages</a
+  >
+  {% endif %}
+  <a class="item active"><b style="font-size: 1.5rem;">{{ currentPage }}</b></a>
+  {% if next_url %}
+  <a class="item" href="{{ next_url }}"
+    ><i class="ui icon arrow circle right large"></i> Older Messages</a
+  >
+  {% endif %}
+</div>
+{% endblock %}

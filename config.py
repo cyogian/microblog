@@ -13,7 +13,7 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['cyogian007@gmail.com']
-    POSTS_PER_PAGE = 25
+    POSTS_PER_PAGE = 10
     LANGUAGES = ["en", "es"]
     TRANSLATOR_KEY = os.environ.get("YANDREX_TRANSLATOR_KEY")
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')

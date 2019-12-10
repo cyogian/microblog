@@ -18,6 +18,15 @@
   </head>
   <body>
     <style>
+      .badge {
+        background: gray;
+        padding: 0.15em 0.5em;
+        border-radius: 30%;
+        margin: 0 0.2em;
+        color: white;
+        font-weight: bolder;
+        box-shadow: 0 0 2px 0 gray;
+      }
       #website {
         font-size: 1.5rem;
         background: black;
@@ -34,11 +43,24 @@
         #website {
           text-align: center;
         }
+        #right-menu {
+          flex-direction: column;
+        }
+        .ui.secondary.menu {
+          margin-top: 0.5em;
+        }
+        .ui.secondary.menu .item {
+          align-self: flex-start;
+        }
+        #profile {
+          width: 100%;
+          justify-content: center;
+        }
       }
       #search-box-2 {
         display: none;
       }
-      @media (max-width: 600px) {
+      @media (max-width: 720px) {
         #search-box-1 {
           display: none;
         }
@@ -59,7 +81,22 @@
       <a class="item {{ currentExplore }}" href="{{ url_for('main.explore') }}"
         >{{ _("Explore") }}</a
       >
-
+      {% if not current_user.is_anonymous %}
+      <a
+        class="item {{ currentMessage }}"
+        href="{{ url_for('main.messages') }}"
+      >
+        {{ _('Messages') }} {% set new_messages = current_user.new_messages() %}
+        {% if new_messages %}
+        <span
+          id="message_count"
+          class="badge"
+          style="visibility: {% if new_messages %}visible{% else %}hidden {% endif %};"
+          >{{ new_messages }}</span
+        >
+        {% endif %}
+      </a>
+      {% endif %}
       <div
         class="right menu"
         id="right-menu"
@@ -72,7 +109,7 @@
           >
         </div>
         {% else %}
-        <div class="item">
+        <div class="item" id="profile">
           <a href="{{ url_for('main.user', username=current_user.username) }}"
             ><i class="circular green large user icon"></i
           ></a>
@@ -90,7 +127,7 @@
             action="{{ url_for('main.search') }}"
           >
             <div class="ui icon input">
-              {{ g.search_form.q(size=20, class='prompt',
+              {{ g.search_form.q(size=20, class_='prompt',
               placeholder=g.search_form.q.label.text) }}
               <i class="search icon"></i>
             </div>
@@ -107,7 +144,7 @@
         action="{{ url_for('main.search') }}"
       >
         <div class="ui icon input">
-          {{ g.search_form.q(size=20, class='prompt',
+          {{ g.search_form.q(size=20, class_='prompt',
           placeholder=g.search_form.q.label.text) }}
           <i class="search icon"></i>
         </div>
@@ -220,7 +257,30 @@
               $(destElem).text("{{ _('Error: Could not contact server.') }}");
           });
       }
+
+      function set_message_count(n) {
+            $('#message_count').text(n);
+            $('#message_count').css('visibility', n ? 'visible' : 'hidden');
+        }
+
+      {% if current_user.is_authenticated %}
+      $(function() {
+          var since = 0;
+          setInterval(function() {
+              $.ajax('{{ url_for('main.notifications') }}?since=' + since).done(
+                  function(notifications) {
+                      for (var i = 0; i < notifications.length; i++) {
+                          if (notifications[i].name == 'unread_message_count')
+                              set_message_count(notifications[i].data);
+                          since = notifications[i].timestamp;
+                      }
+                  }
+              );
+          }, 10000);
+      });
+      {% endif %}
     </script>
+
     {% endblock %}
   </body>
 </html>

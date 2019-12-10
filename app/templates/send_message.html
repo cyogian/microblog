@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %} {% if form %}
+<h1>{{ _('Send message to %(recipient)s', recipient=recipient) }}</h1>
+<div class="ui segment">
+  <form class="ui form" action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="field">
+      {{ form.message.label }} {{ form.message(cols=32, rows=4)}} {% if
+      form.message.errors %}
+      <div class="ui error message" style="display: inherit">
+        <ul class="list">
+          {% for error in form.message.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    <p>
+      {{ form.submit(class_="fluid ui button green") }}
+    </p>
+  </form>
+</div>
+{% endif %} {% endblock %}
