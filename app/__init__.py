@@ -10,6 +10,8 @@ from flask_moment import Moment
 from flask_babel import Babel, lazy_gettext as _l
 from flask import request
 from elasticsearch import Elasticsearch
+from redis import Redis
+import rq
 
 db = SQLAlchemy()                # flask-sqlalchemy : db-connector instance
 migrate = Migrate()          # flask-migrate : db migration engine
@@ -30,8 +32,12 @@ def create_app(config_class=Config):
     mail.init_app(app)
     moment.init_app(app)
     babel.init_app(app)
+
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
+
+    app.redis = Redis.from_url(app.config['REDIS_URL'])
+    app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
 
     if not babel.locale_selector_func:
         @babel.localeselector

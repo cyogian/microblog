@@ -5,7 +5,7 @@ from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
-import jwt, json
+import jwt, json, redis, rq
 from app.search import add_to_index, remove_from_index, query_index
 
 
@@ -77,13 +77,14 @@ class User(UserMixin, db.Model):
                                     foreign_keys='Message.recepient_id',
                                     backref='recipient', lazy='dynamic')
     last_message_read_time = db.Column(db.DateTime)
+    tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     def new_messages(self):
         last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
         return Message.query.filter_by(recipient=self).filter(
                 Message.timestamp > last_read_time
             ).count()
-
+    # Follow / Unfollow related functions
     def follow(self, user):
         if not self.is_following(user):
             self.followed.append(user)
@@ -110,12 +111,14 @@ class User(UserMixin, db.Model):
             Post.timestamp.desc()
         )
 
+    # Password related functions
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    # Email Verification functions
     def get_email_verification_token(self, expires_in=432000):
         return jwt.encode(
             {'verify_email': self.id, 'exp': time() + expires_in},
@@ -130,7 +133,7 @@ class User(UserMixin, db.Model):
             return
         return User.query.get(id)
 
-
+    # Password Reset functions
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
@@ -145,6 +148,7 @@ class User(UserMixin, db.Model):
             return
         return User.query.get(id)
 
+    # User avatar url creation function
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
@@ -154,7 +158,20 @@ class User(UserMixin, db.Model):
         n = Notification(name=name, payload_json=json.dumps(data), user=self)
         db.session.add(n)
         return n
+    
+    # Task related functions
+    def launch_task(self, name, description, *args, **kwargs):
+        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, *args, **kwargs)
+        task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
+        db.session.add(task)
+        return task
 
+    def get_tasks_in_progress(self):
+        return Task.query.filter_by(user=self, complete=False).all()
+
+    def get_task_in_progress(self, name):
+        return Task.query.filter_by(name=name, user=self, complete=False).first()
+    
     def __repr__(self):
         return "<User {}>".format(self.username) 
     
@@ -193,4 +210,23 @@ class Notification(db.Model):
 
     def get_data(self):
         return json.loads(str(self.payload_json))
+
+
+class Task(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    name = db.Column(db.String(128), index=True)
+    description = db.Column(db.String(200))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    complete = db.Column(db.Boolean, default=False)
+
+    def get_rq_job(self):
+        try:
+            rq_job = rq.job.Job.fetch(self.id, connection=current_app.redis)
+        except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError):
+            return None
+        return rq_job
     
+    def get_progress(self):
+        job = self.get_rq_job()
+        return job.meta.get('progress', 0) if job is not None else 100
+        

@@ -17,3 +17,4 @@ class Config(object):
     LANGUAGES = ["en", "es"]
     TRANSLATOR_KEY = os.environ.get("YANDREX_TRANSLATOR_KEY")
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
+    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'

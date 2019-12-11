@@ -48,10 +48,22 @@
     </div>
     {% if user == current_user %}
     <div class="extra content">
-      <a href="{{ url_for('main.edit_profile') }}">
+      <a
+        class="violet ui fluid button"
+        href="{{ url_for('main.edit_profile') }}"
+      >
         <i class="edit icon"></i>
         {{ _("Edit your profile") }}
       </a>
+      {% if not current_user.get_task_in_progress('export_posts') %}
+      <p></p>
+      <a
+        class="orange ui fluid button"
+        href="{{ url_for('main.export_posts') }}"
+      >
+        {{ _('Export your posts') }}
+      </a>
+      {% endif %}
     </div>
     {% endif %}
   </div>
