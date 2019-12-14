@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators  import DataRequired, ValidationError, Length
 from flask_babel import lazy_gettext as _l
-from app.models import User
+from ..models import User
 from flask import request
 class EditProfileForm(FlaskForm):
     username = StringField(_l('Username'), validators=[DataRequired()])

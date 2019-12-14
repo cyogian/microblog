@@ -1,13 +1,13 @@
 from flask import render_template, flash, redirect, url_for, request, g, jsonify, current_app
-from app import db
+from .. import db
 from .forms import EditProfileForm, PostForm, SearchForm, MessageForm
-from app.models import User, Post, Message, Notification
+from ..models import User, Post, Message, Notification
 from flask_login import current_user, login_required
 from datetime import datetime
 from flask_babel import _, get_locale
 from guess_language import guess_language
 
-from app.translate import translate
+from ..translate import translate
 from . import bp
 from flask_babel import lazy_gettext as _l
 

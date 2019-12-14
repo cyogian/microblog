@@ -2,8 +2,8 @@ from . import bp
 from .forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, EmailVerificationForm
 from .email import send_email_verification_email, send_password_reset_email
 from flask import render_template, flash, redirect, url_for, request
-from app import db
-from app.models import User
+from .. import db
+from ..models import User
 from flask_login import current_user, logout_user, login_user, login_required
 from werkzeug.urls import url_parse
 from flask_babel import _

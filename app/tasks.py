@@ -1,10 +1,10 @@
-from app import create_app, db
-from app.models import Task, User, Post
+from . import create_app, db
+from .models import Task, User, Post
 from rq import get_current_job
 
 import json
 from flask import render_template
-from app.email import send_mail
+from .email import send_mail
 import sys
 import time
 

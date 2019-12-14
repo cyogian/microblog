@@ -1,12 +1,12 @@
-from app import db, login
+from . import db, login
 from flask import current_app, url_for
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
-import jwt, json, redis, rq
-from app.search import add_to_index, remove_from_index, query_index
+import jwt, json, redis, rq, base64, os
+from .search import add_to_index, remove_from_index, query_index
 
 
 followers = db.Table(
@@ -98,6 +98,9 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                                     backref='recipient', lazy='dynamic')
     last_message_read_time = db.Column(db.DateTime)
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
+
+    token = db.Column(db.String(32), index=True, unique=True)
+    token_expiration = db.Column(db.DateTime)
 
     def new_messages(self):
         last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
@@ -219,6 +222,28 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                 setattr(self, field, data[field])
         if new_user and 'password' in data:
             self.set_password(data['password'])
+
+    # Authentication & Authorization functions
+
+    def get_token(self, expires_in=3600):
+        now = datetime.utcnow()
+        if self.token and self.token_expiration > now + timedelta(seconds=60):
+            return self.token
+        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
+        self.token_expiration = now + timedelta(seconds=expires_in)
+        db.session.add(self)
+        return self.token
+    
+    def revoke_token(self):
+        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+    
+    @staticmethod
+    def check_token(token):
+        user = User.query.filter_by(token=token).first()
+        if user is None or user.token_expiration < datetime.utcnow():
+            return None
+        return user
+
 
     def __repr__(self):
         return "<User {}>".format(self.username) 
