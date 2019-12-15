@@ -1,8 +1,8 @@
 from flask import jsonify, request, g, abort
 from .. import db
 from . import bp
-from ..models import User
-from .auth import basic_auth, token_auth
+from ..models import User, Post
+from .auth import token_auth
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -36,9 +36,18 @@ def get_followed(id):
     data = User.to_collection_dict(user.followed, page, per_page, 'api.get_followed', id=id)
     return jsonify(data)
 
+@bp.route('/users/<int:id>/posts', methods=['GET'])
+@token_auth.login_required
+def get_user_posts(id):
+    user = User.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    data = Post.to_collection_dict(user.posts, page, per_page, 'api.get_user_posts', id=id)
+    return jsonify(data)
+
 from flask import url_for
-from app import db
-from app.api.errors import bad_request
+from .. import db
+from ..api.errors import bad_request
 
 @bp.route('/users', methods=['POST'])
 def create_user():

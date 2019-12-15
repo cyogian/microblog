@@ -7,6 +7,7 @@ from flask_login import UserMixin
 from hashlib import md5
 import jwt, json, redis, rq, base64, os
 from .search import add_to_index, remove_from_index, query_index
+from guess_language import guess_language
 
 
 followers = db.Table(
@@ -249,13 +250,35 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return "<User {}>".format(self.username) 
     
 
-class Post(SearchableMixin, db.Model):
+class Post(PaginatedAPIMixin, SearchableMixin, db.Model):
     __searchable__ = ['body']
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(180))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     language = db.Column(db.String(5))
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'author': self.author.to_dict(),
+            'created_at': self.timestamp.isoformat() + 'Z',
+            'body': self.body,
+            'language': self.language,
+            '_links': {
+                'self': url_for('api.get_post', id=self.id)
+            }
+        }
+        return data
+    
+    def from_dict(self, data, new_post=True):
+        if "body" in data:
+            setattr(self, "body", data["body"])
+        if new_post and "user_id" in data:
+            setattr(self, "user_id", data["user_id"])
+        language = guess_language(data["body"])
+        setattr(self, "language", language)
+
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
