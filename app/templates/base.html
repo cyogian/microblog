@@ -183,6 +183,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
     <script src="{{url_for('static', filename='popover.min.js')}}"></script>
     <script>
+      function delete_post(id) {
+        current_url = window.location;
+        if (window.confirm("Are you sure you want to delete this post?")) {
+          window.location =
+            "/post/" + id.toString() + "/delete?current_url=" + current_url;
+        }
+      }
+
       document.addEventListener("click", function(e) {
         x = $(".fu_popover_default");
         if (x.length) {

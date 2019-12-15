@@ -38,5 +38,14 @@
       </div>
       {% endif %}
     </div>
+    {% if post.author == current_user %}
+    <button
+      class="red ui button"
+      onclick="delete_post({{ post.id }})"
+      style="position: absolute; right: 0.3em; padding: 5px 3px 5px 10px"
+    >
+      <i class="eraser icon"></i>
+    </button>
+    {% endif %}
   </div>
 </div>

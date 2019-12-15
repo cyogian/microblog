@@ -6,7 +6,6 @@ from flask_login import current_user, login_required
 from datetime import datetime
 from flask_babel import _, get_locale
 from guess_language import guess_language
-
 from ..translate import translate
 from . import bp
 from flask_babel import lazy_gettext as _l
@@ -43,6 +42,23 @@ def index():
     prev_url = url_for('main.index', page=posts.prev_num) if posts.has_prev else None
 
     return render_template('index.html', title=_l('Home'), currentHome = 'active', posts=posts.items, form=form, prev_url=prev_url,next_url=next_url, currentPage=page)
+
+@bp.route('/post/<int:id>/delete')
+@login_required
+def delete_post(id):
+    if not current_user.is_verified:
+        return redirect(url_for("auth.email_verification_prompt"))
+    post = Post.query.get_or_404(id)
+    redirect_to = request.args.get('current_url') or url_for('main.index')
+    if post.author == current_user:
+        db.session.delete(post)
+        db.session.commit()
+        flash(_('Your post is deleted successfuly!'))
+    else:
+        flash(_('Forbidden Action!'))
+    return redirect(redirect_to)
+
+
 
 @bp.route('/user/<username>')
 @login_required
