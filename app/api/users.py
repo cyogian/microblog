@@ -55,7 +55,7 @@ def get_user_posts(id):
     return jsonify(data)
 
 
-@bp.route('/users/<int:id>/follow', methods=['PUT'])
+@bp.route('/users/<int:id>/follow', methods=['PATCH'])
 @token_auth.login_required
 def follow(id):
     user = User.query.get_or_404(id)
@@ -72,7 +72,7 @@ def follow(id):
     return response
 
 
-@bp.route('/users/<int:id>/unfollow', methods=['PUT'])
+@bp.route('/users/<int:id>/unfollow', methods=['PATCH'])
 @token_auth.login_required
 def unfollow(id):
     user = User.query.get_or_404(id)
