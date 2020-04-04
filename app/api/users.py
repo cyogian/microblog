@@ -1,3 +1,5 @@
+from flask import url_for
+from ..api.errors import bad_request
 from flask import jsonify, request, g, abort
 from .. import db
 from . import bp
@@ -10,6 +12,7 @@ from .auth import token_auth
 def get_user(id):
     return jsonify(User.query.get_or_404(id).to_dict())
 
+
 @bp.route('/users', methods=['GET'])
 @token_auth.login_required
 def get_users():
@@ -18,14 +21,17 @@ def get_users():
     data = User.to_collection_dict(User.query, page, per_page, 'api.get_users')
     return jsonify(data)
 
+
 @bp.route('/users/<int:id>/followers', methods=['GET'])
 @token_auth.login_required
 def get_followers(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = User.to_collection_dict(user.followers, page, per_page, 'api.get_followers', id=id)
+    data = User.to_collection_dict(
+        user.followers, page, per_page, 'api.get_followers', id=id)
     return jsonify(data)
+
 
 @bp.route('/users/<int:id>/followed', methods=['GET'])
 @token_auth.login_required
@@ -33,8 +39,10 @@ def get_followed(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = User.to_collection_dict(user.followed, page, per_page, 'api.get_followed', id=id)
+    data = User.to_collection_dict(
+        user.followed, page, per_page, 'api.get_followed', id=id)
     return jsonify(data)
+
 
 @bp.route('/users/<int:id>/posts', methods=['GET'])
 @token_auth.login_required
@@ -42,12 +50,10 @@ def get_user_posts(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Post.to_collection_dict(user.posts, page, per_page, 'api.get_user_posts', id=id)
+    data = Post.to_collection_dict(
+        user.posts, page, per_page, 'api.get_user_posts', id=id)
     return jsonify(data)
 
-from flask import url_for
-from .. import db
-from ..api.errors import bad_request
 
 @bp.route('/users', methods=['POST'])
 def create_user():
@@ -77,15 +83,8 @@ def update_user(id):
     data = request.get_json() or {}
     if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():
         return bad_request('please use a different username')
-    if 'email' in data and data['email'] != user.username and User.query.filter_by(email=data['email']).first():
+    if 'email' in data and data['email'] != user.email and User.query.filter_by(email=data['email']).first():
         return bad_request('please use a different email address')
     user.from_dict(data, new_user=False)
     db.session.commit()
     return jsonify(user.to_dict())
-
-
-
-
-
-
-

@@ -5,16 +5,22 @@ from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
-import jwt, json, redis, rq, base64, os
+import jwt
+import json
+import redis
+import rq
+import base64
+import os
 from .search import add_to_index, remove_from_index, query_index
 from guess_language import guess_language
 
 
 followers = db.Table(
-    'followers', 
+    'followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
 )
+
 
 class SearchableMixin(object):
     @classmethod
@@ -34,6 +40,7 @@ class SearchableMixin(object):
             'update': list(session.dirty),
             'delete': list(session.deleted)
         }
+
     @classmethod
     def after_commit(cls, session):
         for obj in session._changes['add']:
@@ -46,14 +53,16 @@ class SearchableMixin(object):
             if isinstance(obj, SearchableMixin):
                 remove_from_index(obj.__tablename__, obj)
         session._changes = None
-    
+
     @classmethod
     def reindex(cls):
         for obj in cls.query:
             add_to_index(cls.__tablename__, obj)
 
+
 db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
 db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
+
 
 class PaginatedAPIMixin(object):
     @staticmethod
@@ -75,6 +84,7 @@ class PaginatedAPIMixin(object):
         }
         return data
 
+
 class User(PaginatedAPIMixin, UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -82,7 +92,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref="author", lazy="dynamic")
     about_me = db.Column(db.String(140))
-    notifications = db.relationship('Notification', backref="user", lazy="dynamic")
+    notifications = db.relationship(
+        'Notification', backref="user", lazy="dynamic")
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     is_verified = db.Column(db.Boolean, unique=False, default=False)
     followed = db.relationship(
@@ -91,12 +102,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         secondaryjoin=(followers.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
     )
-    messages_sent = db.relationship('Message', 
+    messages_sent = db.relationship('Message',
                                     foreign_keys='Message.sender_id',
                                     backref='author', lazy='dynamic')
-    messages_received = db.relationship('Message', 
-                                    foreign_keys='Message.recepient_id',
-                                    backref='recipient', lazy='dynamic')
+    messages_received = db.relationship('Message',
+                                        foreign_keys='Message.recepient_id',
+                                        backref='recipient', lazy='dynamic')
     last_message_read_time = db.Column(db.DateTime)
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
@@ -106,13 +117,14 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     def new_messages(self):
         last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
         return Message.query.filter_by(recipient=self).filter(
-                Message.timestamp > last_read_time
-            ).count()
+            Message.timestamp > last_read_time
+        ).count()
     # Follow / Unfollow related functions
+
     def follow(self, user):
         if not self.is_following(user):
             self.followed.append(user)
-    
+
     def unfollow(self, user):
         if self.is_following(user):
             self.followed.remove(user)
@@ -120,10 +132,10 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     def is_following(self, user):
         return self.followed.filter(
             followers.c.followed_id == user.id
-            ).count() > 0
-    
+        ).count() > 0
+
     def followed_posts(self):
-        followed =  Post.query.join(
+        followed = Post.query.join(
             followers,
             (followers.c.followed_id == Post.user_id)
         ).filter(
@@ -138,7 +150,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     # Password related functions
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -147,12 +159,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return jwt.encode(
             {'verify_email': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm="HS256").decode('utf-8')
-    
+
     @staticmethod
     def verify_email_verification_token(token):
         try:
             id = jwt.decode(token, current_app.config["SECRET_KEY"],
-            algorithms=["HS256"])["verify_email"]
+                            algorithms=["HS256"])["verify_email"]
         except:
             return
         return User.query.get(id)
@@ -162,12 +174,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm="HS256").decode('utf-8')
-    
+
     @staticmethod
     def verify_reset_password_token(token):
         try:
             id = jwt.decode(token, current_app.config["SECRET_KEY"],
-            algorithms=["HS256"])["reset_password"]
+                            algorithms=["HS256"])["reset_password"]
         except:
             return
         return User.query.get(id)
@@ -182,11 +194,13 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         n = Notification(name=name, payload_json=json.dumps(data), user=self)
         db.session.add(n)
         return n
-    
+
     # Task related functions
     def launch_task(self, name, description, *args, **kwargs):
-        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, *args, **kwargs)
-        task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
+        rq_job = current_app.task_queue.enqueue(
+            'app.tasks.' + name, self.id, *args, **kwargs)
+        task = Task(id=rq_job.get_id(), name=name,
+                    description=description, user=self)
         db.session.add(task)
         return task
 
@@ -195,7 +209,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
 
     def get_task_in_progress(self, name):
         return Task.query.filter_by(name=name, user=self, complete=False).first()
-    
+
     # api related functions
     def to_dict(self, include_email=False):
         data = {
@@ -234,10 +248,10 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         self.token_expiration = now + timedelta(seconds=expires_in)
         db.session.add(self)
         return self.token
-    
+
     def revoke_token(self):
         self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
-    
+
     @staticmethod
     def check_token(token):
         user = User.query.filter_by(token=token).first()
@@ -245,13 +259,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             return None
         return user
 
-
     def __repr__(self):
-        return "<User {}>".format(self.username) 
-    
+        return "<User {}>".format(self.username)
 
-class Post(PaginatedAPIMixin, SearchableMixin, db.Model):
-    __searchable__ = ['body']
+
+class Post(PaginatedAPIMixin, db.Model):
+    # __searchable__ = ['body']
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(180))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -270,7 +283,7 @@ class Post(PaginatedAPIMixin, SearchableMixin, db.Model):
             }
         }
         return data
-    
+
     def from_dict(self, data, new_post=True):
         if "body" in data:
             setattr(self, "body", data["body"])
@@ -279,13 +292,14 @@ class Post(PaginatedAPIMixin, SearchableMixin, db.Model):
         language = guess_language(data["body"])
         setattr(self, "language", language)
 
-
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
 
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -297,10 +311,11 @@ class Message(db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
+
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)
-    user_id =  db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     timestamp = db.Column(db.Float, index=True, default=time)
     payload_json = db.Column(db.Text)
 
@@ -321,8 +336,7 @@ class Task(db.Model):
         except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError):
             return None
         return rq_job
-    
+
     def get_progress(self):
         job = self.get_rq_job()
         return job.meta.get('progress', 0) if job is not None else 100
-        
