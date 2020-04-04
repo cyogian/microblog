@@ -1,5 +1,5 @@
 from . import db, login
-from flask import current_app, url_for
+from flask import current_app, url_for, g
 from datetime import datetime, timedelta
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -225,7 +225,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                 'followers': url_for('api.get_followers', id=self.id),
                 'followed': url_for('api.get_followed', id=self.id),
                 'avatar': self.avatar(128)
-            }
+            },
+            'isFollowing': g.current_user.is_following(self)
         }
         if include_email:
             data['email'] = self.email

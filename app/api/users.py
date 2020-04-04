@@ -55,6 +55,40 @@ def get_user_posts(id):
     return jsonify(data)
 
 
+@bp.route('/users/<int:id>/follow', methods=['PUT'])
+@token_auth.login_required
+def follow(id):
+    user = User.query.get_or_404(id)
+    if user == g.current_user:
+        return bad_request("CANNOT_FOLLOW_YOURSELF")
+    g.current_user.follow(user)
+    db.session.commit()
+    data = {
+        "username": user.username,
+        "isFollowing": g.current_user.is_following(user)
+    }
+    response = jsonify(data)
+    response.status_code = 201
+    return response
+
+
+@bp.route('/users/<int:id>/unfollow', methods=['PUT'])
+@token_auth.login_required
+def unfollow(id):
+    user = User.query.get_or_404(id)
+    if user == g.current_user:
+        return bad_request("CANNOT_UNFOLLOW_YOURSELF")
+    g.current_user.unfollow(user)
+    db.session.commit()
+    data = {
+        "username": user.username,
+        "isFollowing": g.current_user.is_following(user)
+    }
+    response = jsonify(data)
+    response.status_code = 201
+    return response
+
+
 @bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json() or {}
