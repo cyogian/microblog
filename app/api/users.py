@@ -5,6 +5,7 @@ from .. import db
 from . import bp
 from ..models import User, Post
 from .auth import token_auth
+import re
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -122,3 +123,38 @@ def update_user(id):
     user.from_dict(data, new_user=False)
     db.session.commit()
     return jsonify(user.to_dict())
+
+
+@bp.route('/users/duplicate_check', methods=['POST'])
+def duplicate_check():
+    data = request.get_json() or {}
+    if 'username' not in data and 'email' not in data:
+        return bad_request("Invalid data provided")
+    response = {
+        "success": False,
+        "errors": {}
+    }
+    if 'username' in data:
+        username = data["username"]
+        if len(username) <= 2:
+            response["errors"]["username"] = "Username too short"
+        elif len(username) > 64:
+            response["errors"]["username"] = "Username too long"
+        elif len(username.split(" ")) > 1:
+            response["errors"]["username"] = "Username can't contain spaces"
+        elif not User.username_is_available(username):
+            response["errors"]["username"] = "Username already in use"
+
+    if 'email' in data:
+        regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+        email = data["email"]
+        if re.search(regex, email):
+            if not User.email_is_available(email):
+                response["errors"]["email"] = "Email already in use"
+        else:
+            response["errors"]["email"] = "not a valid email address"
+
+    if not response["errors"]:
+        response["success"] = True
+
+    return jsonify(response)

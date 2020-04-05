@@ -184,6 +184,14 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             return
         return User.query.get(id)
 
+    @staticmethod
+    def username_is_available(username):
+        return User.query.filter_by(username=username).first() == None
+
+    @staticmethod
+    def email_is_available(email):
+        return User.query.filter_by(email=email).first() == None
+
     # User avatar url creation function
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
