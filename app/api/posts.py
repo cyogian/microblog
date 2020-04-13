@@ -11,13 +11,16 @@ from ..api.errors import bad_request
 def get_posts():
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Post.to_collection_dict(Post.query, page, per_page, 'api.get_user_posts', id=id)
+    data = Post.to_collection_dict(
+        Post.query, page, per_page, 'api.get_user_posts', id=id)
     return jsonify(data)
+
 
 @bp.route('/posts/<int:id>', methods=["GET"])
 @token_auth.login_required
 def get_post(id):
     return jsonify(Post.query.get_or_404(id).to_dict())
+
 
 @bp.route('/posts/<int:id>', methods=["PUT"])
 @token_auth.login_required
@@ -34,6 +37,7 @@ def update_post(id):
     db.session.commit()
     return jsonify(post.to_dict())
 
+
 @bp.route('/posts/<int:id>', methods=["DELETE"])
 @token_auth.login_required
 def delete_post(id):
@@ -43,6 +47,7 @@ def delete_post(id):
     db.session.delete(post)
     db.session.commit()
     return '', 204
+
 
 @bp.route('/posts', methods=['POST'])
 @token_auth.login_required
