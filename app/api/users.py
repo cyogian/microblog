@@ -8,10 +8,10 @@ from .auth import token_auth
 import re
 
 
-@bp.route('/users/<int:id>', methods=['GET'])
+@bp.route('/users/current', methods=['GET'])
 @token_auth.login_required
-def get_user(id):
-    return jsonify(User.query.get_or_404(id).to_dict())
+def get_current_user():
+    return jsonify(g.current_user.to_dict())
 
 
 @bp.route('/users/by_name', methods=['GET'])
@@ -19,6 +19,12 @@ def get_user(id):
 def get_user_by_name():
     username = request.args.get('username', "", type=str)
     return jsonify(User.query.filter_by(username=username).first_or_404().to_dict())
+
+
+@bp.route('/users/<int:id>', methods=['GET'])
+@token_auth.login_required
+def get_user(id):
+    return jsonify(User.query.get_or_404(id).to_dict())
 
 
 @bp.route('/users', methods=['GET'])
