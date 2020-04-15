@@ -299,6 +299,8 @@ class Post(PaginatedAPIMixin, db.Model):
         if new_post and "user_id" in data:
             setattr(self, "user_id", data["user_id"])
         language = guess_language(data["body"])
+        if language == "UNKNOWN" or len(language) > 5:
+            language = ""
         setattr(self, "language", language)
 
     def __repr__(self):

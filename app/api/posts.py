@@ -12,7 +12,18 @@ def get_posts():
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = Post.to_collection_dict(
-        Post.query, page, per_page, 'api.get_user_posts', id=id)
+        Post.query.order_by(Post.timestamp.desc()
+                            ), page, per_page, 'api.get_posts')
+    return jsonify(data)
+
+
+@bp.route('/posts/followed_posts', methods=["GET"])
+@token_auth.login_required
+def get_followed_posts():
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    data = Post.to_collection_dict(
+        g.current_user.followed_posts(), page, per_page, 'api.get_posts')
     return jsonify(data)
 
 
@@ -27,7 +38,7 @@ def get_post(id):
 def update_post(id):
     post = Post.query.get_or_404(id)
     if g.current_user != post.author:
-        abort(403)
+        abort(401)
     data = request.get_json() or {}
     if "body" not in data:
         return bad_request('please provide a body for post')
@@ -43,7 +54,7 @@ def update_post(id):
 def delete_post(id):
     post = Post.query.get_or_404(id)
     if g.current_user != post.author:
-        abort(403)
+        abort(401)
     db.session.delete(post)
     db.session.commit()
     return '', 204

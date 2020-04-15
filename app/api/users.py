@@ -14,6 +14,13 @@ def get_user(id):
     return jsonify(User.query.get_or_404(id).to_dict())
 
 
+@bp.route('/users/by_name', methods=['GET'])
+@token_auth.login_required
+def get_user_by_name():
+    username = request.args.get('username', "", type=str)
+    return jsonify(User.query.filter_by(username=username).first_or_404().to_dict())
+
+
 @bp.route('/users', methods=['GET'])
 @token_auth.login_required
 def get_users():
@@ -113,7 +120,7 @@ def create_user():
 @token_auth.login_required
 def update_user(id):
     if g.current_user.id != id:
-        abort(403)
+        abort(401)
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
     if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():
