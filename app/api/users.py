@@ -108,6 +108,9 @@ def create_user():
     data = request.get_json() or {}
     if 'username' not in data or 'email' not in data or 'password' not in data:
         return bad_request('must include username, email and password fields')
+    else:
+        data['username'] = data['username'].lower()
+        data['email'] = data['email'].lower()
     if User.query.filter_by(username=data['username']).first():
         return bad_request('please use a different username')
     if User.query.filter_by(email=data['email']).first():
@@ -129,10 +132,14 @@ def update_user(id):
         abort(401)
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
-    if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():
-        return bad_request('please use a different username')
-    if 'email' in data and data['email'] != user.email and User.query.filter_by(email=data['email']).first():
-        return bad_request('please use a different email address')
+    if 'username' in data:
+        data['username'] = data['username'].lower()
+        if data['username'] != user.username and User.query.filter_by(username=data['username']).first():
+            return bad_request('please use a different username')
+    if 'email' in data:
+        data['email'] = data['email'].lower()
+        if data['email'] != user.email and User.query.filter_by(email=data['email']).first():
+            return bad_request('please use a different email address')
     user.from_dict(data, new_user=False)
     db.session.commit()
     return jsonify(user.to_dict())
@@ -148,7 +155,7 @@ def duplicate_check():
         "errors": {}
     }
     if 'username' in data:
-        username = data["username"]
+        username = data["username"].lower()
         if len(username) <= 2:
             response["errors"]["username"] = "Username too short"
         elif len(username) > 64:
@@ -160,7 +167,7 @@ def duplicate_check():
 
     if 'email' in data:
         regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-        email = data["email"]
+        email = data["email"].lower()
         if re.search(regex, email):
             if not User.email_is_available(email):
                 response["errors"]["email"] = "Email already in use"

@@ -234,11 +234,13 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                 'followed': url_for('api.get_followed', id=self.id),
                 'avatar': self.avatar(128)
             },
-            'isFollowing': g.current_user.is_following(self)
         }
-        if include_email:
-            data['email'] = self.email
-        return data
+        try:
+            data["is_following"] = g.current_user.is_following(self)
+        finally:
+            if include_email:
+                data['email'] = self.email
+            return data
 
     def from_dict(self, data, new_user=False):
         for field in ['username', 'email', 'about_me']:
@@ -266,6 +268,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         user = User.query.filter_by(token=token).first()
         if user is None or user.token_expiration < datetime.utcnow():
             return None
+        user.last_seen = datetime.utcnow()
+        db.session.commit()
         return user
 
     def __repr__(self):
