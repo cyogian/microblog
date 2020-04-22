@@ -1,14 +1,17 @@
 alembic==1.2.1
 astroid==2.3.1
+autopep8==1.5
 Babel==2.7.0
 blinker==1.4
 certifi==2019.9.11
+cffi==1.14.0
 chardet==3.0.4
 Click==7.0
 cryptography==2.8
 elasticsearch==7.1.0
 Flask==1.1.1
 Flask-Babel==0.12.2
+Flask-Cors==3.0.8
 Flask-HTTPAuth==3.3.0
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
@@ -26,6 +29,8 @@ lazy-object-proxy==1.4.2
 Mako==1.1.0
 MarkupSafe==1.1.1
 mccabe==0.6.1
+pycodestyle==2.5.0
+pycparser==2.19
 Pygments==2.5.2
 PyJWT==1.7.1
 pylint==2.4.2
