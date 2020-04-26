@@ -232,7 +232,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                 'self': url_for('api.get_user', id=self.id),
                 'followers': url_for('api.get_followers', id=self.id),
                 'followed': url_for('api.get_followed', id=self.id),
-                'avatar': self.avatar(128)
+                'avatar': self.avatar(128),
+                'avatar_large': self.avatar(420)
             },
         }
         try:
