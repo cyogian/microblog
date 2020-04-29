@@ -7,11 +7,13 @@ from ..models import User, Post
 from .auth import token_auth
 import re
 
+email_regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+
 
 @bp.route('/users/current', methods=['GET'])
 @token_auth.login_required
 def get_current_user():
-    return jsonify(g.current_user.to_dict())
+    return jsonify(g.current_user.to_dict(include_email=True))
 
 
 @bp.route('/users/by_name', methods=['GET'])
@@ -110,12 +112,13 @@ def create_user():
     if 'username' not in data or 'email' not in data or 'password' not in data:
         return bad_request('must include username, email and password fields')
     else:
-        data['username'] = data['username'].lower()
-        data['email'] = data['email'].lower()
+        data['username'] = data['username'].strip().lower()
+        data['email'] = data['email'].strip().lower()
     if User.query.filter_by(username=data['username']).first():
         return bad_request('please use a different username')
-    if User.query.filter_by(email=data['email']).first():
+    if (not re.search(email_regex, data['email'])) or User.query.filter_by(email=data['email']).first():
         return bad_request('please use a different email address')
+
     user = User()
     user.from_dict(data, new_user=True)
     db.session.add(user)
@@ -126,24 +129,23 @@ def create_user():
     return response
 
 
-@bp.route('/users/<int:id>', methods=['PUT'])
+@bp.route('/users', methods=['PUT'])
 @token_auth.login_required
-def update_user(id):
-    if g.current_user.id != id:
-        abort(401)
-    user = User.query.get_or_404(id)
+def update_user():
+    user = g.current_user
     data = request.get_json() or {}
     if 'username' in data:
-        data['username'] = data['username'].lower()
+        data['username'] = data['username'].strip().lower()
         if data['username'] != user.username and User.query.filter_by(username=data['username']).first():
             return bad_request('please use a different username')
+
     if 'email' in data:
-        data['email'] = data['email'].lower()
-        if data['email'] != user.email and User.query.filter_by(email=data['email']).first():
+        data['email'] = data['email'].strip().lower()
+        if not re.search(email_regex, data['email']) or (data['email'] != user.email and User.query.filter_by(email=data['email']).first()):
             return bad_request('please use a different email address')
     user.from_dict(data, new_user=False)
     db.session.commit()
-    return jsonify(user.to_dict())
+    return jsonify(user.to_dict(include_email=True))
 
 
 @bp.route('/users/duplicate_check', methods=['POST'])
@@ -156,7 +158,7 @@ def duplicate_check():
         "errors": {}
     }
     if 'username' in data:
-        username = data["username"].lower()
+        username = data["username"].strip().lower()
         if len(username) <= 2:
             response["errors"]["username"] = "Username too short"
         elif len(username) > 64:
@@ -167,9 +169,8 @@ def duplicate_check():
             response["errors"]["username"] = "Username already in use"
 
     if 'email' in data:
-        regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-        email = data["email"].lower()
-        if re.search(regex, email):
+        email = data["email"].strip().lower()
+        if re.search(email_regex, email):
             if not User.email_is_available(email):
                 response["errors"]["email"] = "Email already in use"
         else:
