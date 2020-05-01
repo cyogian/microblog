@@ -356,3 +356,11 @@ class Task(db.Model):
     def get_progress(self):
         job = self.get_rq_job()
         return job.meta.get('progress', 0) if job is not None else 100
+
+
+class TempEmailChange(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    otp = db.Column(db.Integer)
+    userId = db.Column(db.Integer, db.ForeignKey("user.id"))
+    email = db.Column(db.String(128))
+    otp_expiration = db.Column(db.DateTime)
