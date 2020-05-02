@@ -180,7 +180,8 @@ def update_email():
                     db.session.commit()
                     response = jsonify({
                         "tempId": tempEmailChange.id,
-                        "otp_expiration": tempEmailChange.otp_expiration
+                        "otp_expiration": tempEmailChange.otp_expiration,
+                        "email": tempEmailChange.email
                     })
                     response.status_code = 201
                     return response
@@ -215,7 +216,8 @@ def verify_update():
                         db.session.commit()
                         response = jsonify({
                             "tempId": tempEmailChange.id,
-                            "otp_expiration": tempEmailChange.otp_expiration
+                            "otp_expiration": tempEmailChange.otp_expiration,
+                            "email": tempEmailChange.email
                         })
                         response.status_code = 201
                         return response
