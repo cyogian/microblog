@@ -5,9 +5,9 @@ from .errors import bad_request, error_response
 from flask import jsonify, request, g, abort
 from .. import db
 from . import bp
-from ..models import User, Post, TempEmailChange
+from ..models import User, Post, TempEmailChange, TempEmailVerify
 from .auth import token_auth
-from .email import change_email_otp_email
+from .email import change_email_otp_email, create_user_otp_email, forgot_password_otp_email
 from datetime import datetime, timedelta
 
 email_regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
@@ -118,28 +118,108 @@ def unfollow(id):
     return response
 
 
-@bp.route('/users', methods=['POST'])
+@bp.route('/users/create', methods=['POST'])
 def create_user():
-    """ api route to create new user """
+    """ api route to get otp for email verification to create new user"""
     data = request.get_json() or {}
-    if 'username' not in data or 'email' not in data or 'password' not in data:
-        return bad_request('must include username, email and password fields')
-    else:
-        data['username'] = data['username'].strip().lower()
+    if 'email' in data:
         data['email'] = data['email'].strip().lower()
-    if User.query.filter_by(username=data['username']).first():
-        return bad_request('please use a different username')
-    if (not re.search(email_regex, data['email'])) or User.query.filter_by(email=data['email']).first():
-        return bad_request('please use a different email address')
+        if re.search(email_regex, data['email']):
+            if User.email_is_available(data['email']):
+                otp = randint(100000, 999999)
+                tempEmailVerify = TempEmailVerify()
+                tempEmailVerify.otp = otp
+                tempEmailVerify.email = data['email']
+                tempEmailVerify.otp_expiration = datetime.utcnow() + timedelta(seconds=900)
+                try:
+                    create_user_otp_email(otp, data['email'])
+                    db.session.add(tempEmailVerify)
+                    db.session.commit()
+                    response = jsonify({
+                        "tempId": tempEmailVerify.id,
+                        "otp_expiration": tempEmailVerify.otp_expiration,
+                        "email": tempEmailVerify.email
+                    })
+                    response.status_code = 201
+                    return response
+                except Exception:
+                    return error_response(500, "Unexpected Error")
+            else:
+                return bad_request("Email already in use")
+        else:
+            return bad_request("Invalid Email address")
+    else:
+        return bad_request("Missing Parameter: email")
 
-    user = User()
-    user.from_dict(data, new_user=True)
-    db.session.add(user)
-    db.session.commit()
-    response = jsonify(user.to_dict())
-    response.status_code = 201
-    response.headers['Location'] = url_for('api.get_user', id=user.id)
-    return response
+
+@bp.route('/users/verify_create', methods=['POST'])
+def verify_create():
+    """ api route to verify otp & create new user"""
+    data = request.get_json() or {}
+    if 'tempId' in data:
+        try:
+            tempId = int(data['tempId'])
+            tempEmailVerify = TempEmailVerify.query.get(tempId)
+            if tempEmailVerify:
+                if 'resend' in data and data['resend']:
+                    otp = randint(100000, 999999)
+                    tempEmailVerify.otp = otp
+                    tempEmailVerify.otp_expiration = datetime.utcnow() + timedelta(seconds=900)
+                    try:
+                        create_user_otp_email(
+                            otp, tempEmailVerify.email)
+                        db.session.commit()
+                        response = jsonify({
+                            "tempId": tempEmailVerify.id,
+                            "otp_expiration": tempEmailVerify.otp_expiration,
+                            "email": tempEmailVerify.email
+                        })
+                        response.status_code = 201
+                        return response
+                    except Exception:
+                        return error_response(500, "Unexpected Error")
+                elif 'otp' in data:
+                    try:
+                        otp = int(data['otp'])
+                        if (tempEmailVerify.otp_expiration < datetime.utcnow()):
+                            return bad_request("OTP Expired")
+                        if (tempEmailVerify.otp == otp):
+                            if 'username' not in data or 'password' not in data:
+                                return bad_request('must include username, password fields')
+                            user_data = {}
+                            user_data['username'] = data['username'].strip(
+                            ).lower()
+                            user_data['email'] = tempEmailVerify.email
+                            user_data['password'] = data['password'].strip()
+                            if (not re.search(email_regex, user_data['email'])) or User.query.filter_by(email=user_data['email']).first():
+                                return bad_request('please use a different email address')
+                            if User.query.filter_by(username=user_data['username']).first():
+                                return bad_request('please use a different username')
+                            if user_data['password'] != data['password']:
+                                return bad_request("password can't start or end with spaces")
+                            if len(user_data['password']) < 8:
+                                return bad_request("password should be longer than 8 characters")
+                            user = User()
+                            user.from_dict(user_data, new_user=True)
+                            db.session.add(user)
+                            db.session.commit()
+                            response = jsonify(user.to_dict())
+                            response.status_code = 201
+                            response.headers['Location'] = url_for(
+                                'api.get_user', id=user.id)
+                            return response
+                        else:
+                            return bad_request("Wrong OTP")
+                    except ValueError:
+                        return bad_request("Invalid OTP format")
+                else:
+                    return bad_request("Missing Parameter: otp")
+            else:
+                return error_response(404, "Temporary Request Not Found")
+        except ValueError:
+            return bad_request("Invalid tempId")
+    else:
+        return bad_request("Missing Parameter: tempId")
 
 
 @bp.route('/users', methods=['PUT'])

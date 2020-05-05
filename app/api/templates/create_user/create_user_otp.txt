@@ -1,0 +1,12 @@
+Dear Guest,
+
+Use this One Time Password to create new user with this email:
+
+{{otp}}
+
+This OTP will expire in 15 minutes.
+
+If you have not requested an otp to create new user, simply ignore this message.
+
+Sincerely,
+The Microblog Team

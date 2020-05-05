@@ -6,7 +6,7 @@ Use this One Time Password to change your email:
 
 This OTP will expire in 15 minutes.
 
-If you have not requested an email change simply ignore this message.
+If you have not requested an email change, simply ignore this message.
 
 Sincerely,
 The Microblog Team

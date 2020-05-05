@@ -364,3 +364,10 @@ class TempEmailChange(db.Model):
     userId = db.Column(db.Integer, db.ForeignKey("user.id"))
     email = db.Column(db.String(128))
     otp_expiration = db.Column(db.DateTime)
+
+
+class TempEmailVerify(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    otp = db.Column(db.Integer)
+    email = db.Column(db.String(128))
+    otp_expiration = db.Column(db.DateTime)
