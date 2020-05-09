@@ -118,7 +118,7 @@ def unfollow(id):
     return response
 
 
-@bp.route('/users/create', methods=['POST'])
+@bp.route('/users/create_user', methods=['POST'])
 def create_user():
     """ api route to get otp for email verification to create new user"""
     data = request.get_json() or {}
