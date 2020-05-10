@@ -142,7 +142,7 @@ def create_user():
                     })
                     response.status_code = 201
                     return response
-                except Exception:
+                except:
                     return error_response(500, "Unexpected Error")
             else:
                 return bad_request("Email already in use")
@@ -176,7 +176,7 @@ def verify_create():
                         })
                         response.status_code = 201
                         return response
-                    except Exception:
+                    except:
                         return error_response(500, "Unexpected Error")
                 elif 'otp' in data:
                     try:
