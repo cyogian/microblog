@@ -253,6 +253,7 @@ def change_password():
         if len(password) < 8:
             return bad_request("password must be atleast 8 characters long")
         user.set_password(password)
+        db.session.commit()
         response = jsonify({"success": True})
         response.status_code = 201
         return response
