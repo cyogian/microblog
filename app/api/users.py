@@ -238,6 +238,27 @@ def update_user():
     return jsonify(user.to_dict(include_email=True))
 
 
+@bp.route('/users/change_password', methods=['POST'])
+@token_auth.login_required
+def change_password():
+    """ api route to change password of currentUser """
+    user = g.current_user
+    data = request.get_json() or {}
+    if 'password' in data:
+        password = data['password'].strip()
+        if password != data['password']:
+            return bad_request("password can't start or end with spaces")
+        if len(password.split(' ')) > 1:
+            return bad_request("password should not contain spaces")
+        if len(password) < 8:
+            return bad_request("password must be atleast 8 characters long")
+        user.set_password(password)
+        response = jsonify({"success": True})
+        response.status_code = 201
+        return response
+    return bad_request("Missing Parameter: password")
+
+
 @bp.route('/users/email_update', methods=['PUT'])
 @token_auth.login_required
 def update_email():
