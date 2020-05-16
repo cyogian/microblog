@@ -238,6 +238,111 @@ def update_user():
     return jsonify(user.to_dict(include_email=True))
 
 
+@bp.route('/users/reset_password', methods=['POST'])
+def reset_password():
+    """ api route to get otp for email verification to reset password"""
+    data = request.get_json() or {}
+    if 'email' in data:
+        data['email'] = data['email'].strip().lower()
+        if re.search(email_regex, data['email']):
+            user = User.query.filter_by(email=data['email']).first()
+            if user:
+                otp = randint(100000, 999999)
+                tempEmailVerify = TempEmailVerify()
+                tempEmailVerify.otp = otp
+                tempEmailVerify.email = data['email']
+                tempEmailVerify.otp_expiration = datetime.utcnow() + timedelta(seconds=900)
+
+                try:
+                    forgot_password_otp_email(
+                        otp, user.username, data['email'])
+                    db.session.add(tempEmailVerify)
+                    db.session.commit()
+                    response = jsonify({
+                        "tempId": tempEmailVerify.id,
+                        "otp_expiration": tempEmailVerify.otp_expiration,
+                        "email": tempEmailVerify.email
+                    })
+                    response.status_code = 201
+                    return response
+                except:
+                    return error_response(500, "Unexpected Error")
+            else:
+                return error_response(404, "No account associated with this email")
+        else:
+            return bad_request("Invalid Email address")
+    else:
+        return bad_request("Missing Parameter: email")
+
+
+@bp.route('/users/verify_reset', methods=['POST'])
+def verify_reset():
+    """api route to verify otp & reset password"""
+    data = request.get_json() or {}
+    if 'tempId' in data:
+        try:
+            tempId = int(data['tempId'])
+            tempEmailVerify = TempEmailVerify.query.get(tempId)
+            if tempEmailVerify:
+                if 'resend' in data and data['resend']:
+                    otp = randint(100000, 999999)
+                    tempEmailVerify.otp = otp
+                    tempEmailVerify.otp_expiration = datetime.utcnow() + timedelta(seconds=900)
+                    user = User.query.filter_by(
+                        email=tempEmailVerify.email).first()
+                    if user:
+                        try:
+                            forgot_password_otp_email(
+                                otp, user.username, tempEmailVerify.email)
+                            db.session.commit()
+                            response = jsonify({
+                                "tempId": tempEmailVerify.id,
+                                "otp_expiration": tempEmailVerify.otp_expiration,
+                                "email": tempEmailVerify.email
+                            })
+                            response.status_code = 201
+                            return response
+                        except:
+                            return error_response(500, "Unexpected Error")
+                    else:
+                        return error_response(404, "[Unexpected Error] No account associated with this email")
+                elif 'otp' in data:
+                    try:
+                        otp = int(data['otp'])
+                        if (tempEmailVerify.otp_expiration < datetime.utcnow()):
+                            return bad_request("OTP Expired")
+                        if (tempEmailVerify.otp == otp):
+                            if 'password' not in data:
+                                return bad_request('[Missing parameter] Password')
+                            password = data['password'].strip()
+                            if password != data['password']:
+                                return bad_request("password can't start or end with spaces")
+                            if len(password) < 8:
+                                return bad_request("password should be longer than 8 characters")
+                            user = User.query.filter_by(
+                                email=tempEmailVerify.email).first()
+                            if user:
+                                user.set_password(password)
+                                db.session.commit()
+                                response = jsonify({"success": True})
+                                response.status_code = 201
+                                return response
+                            else:
+                                return error_response(404, "[Unexpected Error] No account associated with this email")
+                        else:
+                            return bad_request("Wrong OTP")
+                    except ValueError:
+                        return bad_request("Invalid OTP format")
+                else:
+                    return bad_request("Missing Parameter: otp")
+            else:
+                return error_response(404, "Temporary Request Not Found")
+        except ValueError:
+            return bad_request("Invalid tempId")
+    else:
+        return bad_request("Missing Parameter: tempId")
+
+
 @bp.route('/users/change_password', methods=['POST'])
 @token_auth.login_required
 def change_password():
