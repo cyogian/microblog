@@ -500,3 +500,14 @@ def duplicate_check():
         response["success"] = True
 
     return jsonify(response)
+
+
+@bp.route('/get_image', methods=['GET'])
+@token_auth.login_required
+def get_image():
+    filename = request.args.get('filename')
+
+
+# @bp.route('/users/image_upload', methods=['POST'])
+# @token_auth.login_required
+# def image_upload():

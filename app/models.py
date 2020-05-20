@@ -197,6 +197,15 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
 
+    def filename(self, small=False):
+        fname = ""
+        if small:
+            fname = f'small_{self.id}.jpg'
+        else:
+            fname = f'big_{self.id}.jpg'
+
+        return (fname, current_app.fernet.encrypt(fname))
+
     def add_notification(self, name, data):
         self.notifications.filter_by(name=name).delete()
         n = Notification(name=name, payload_json=json.dumps(data), user=self)

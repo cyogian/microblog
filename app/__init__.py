@@ -14,6 +14,7 @@ from elasticsearch import Elasticsearch
 from redis import Redis
 import rq
 from flask_cors import CORS
+from cryptography.fernet import Fernet
 
 db = SQLAlchemy()                # flask-sqlalchemy : db-connector instance
 migrate = Migrate()          # flask-migrate : db migration engine
@@ -44,6 +45,7 @@ def create_app(config_class=Config):
 
     app.redis = Redis.from_url(app.config['REDIS_URL'])
     app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
+    app.fernet = Fernet(app.config['IMAGE_NAME_KEY'])
 
     if not babel.locale_selector_func:
         @babel.localeselector
