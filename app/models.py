@@ -193,9 +193,13 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return User.query.filter_by(email=email).first() == None
 
     # User avatar url creation function
-    def avatar(self, size):
-        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
+    def avatar(self, small=False):
+        # digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        # return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
+        url = url_for('api.get_image')
+        isSmall = 1 if small else 0
+        uid = self.get_uid()
+        return f'{current_app.config["BASE_URL"]}{url}?uid={uid}&small={isSmall}'
 
     def filename(self, small=False):
         fname = ""
@@ -203,8 +207,23 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             fname = f'small_{self.id}.jpg'
         else:
             fname = f'big_{self.id}.jpg'
+        return fname
 
-        return (fname, current_app.fernet.encrypt(fname))
+    def get_uid(self):
+        return current_app.fernet.encrypt(str(self.id).encode()).decode("utf-8")
+
+    @staticmethod
+    def get_user(uid):
+        try:
+            id = current_app.fernet.decrypt(uid.encode("utf-8")).decode()
+            if id.isnumeric():
+                id = int(id)
+                user = User.query.get(id)
+                return user
+            else:
+                return None
+        except:
+            return None
 
     def add_notification(self, name, data):
         self.notifications.filter_by(name=name).delete()
@@ -241,8 +260,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                 'self': url_for('api.get_user', id=self.id),
                 'followers': url_for('api.get_followers', id=self.id),
                 'followed': url_for('api.get_followed', id=self.id),
-                'avatar': self.avatar(128),
-                'avatar_large': self.avatar(420)
+                'avatar': self.avatar(True),
+                'avatar_large': self.avatar(False)
             },
         }
         try:

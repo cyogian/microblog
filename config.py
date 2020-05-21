@@ -22,3 +22,5 @@ class Config(object):
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     IMAGE_NAME_KEY = os.environ.get('IMAGE_NAME_KEY')
+    UPLOAD_FOLDER = "uploads/"
+    BASE_URL = os.environ.get("BASE_URL")

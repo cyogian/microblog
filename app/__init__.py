@@ -45,7 +45,8 @@ def create_app(config_class=Config):
 
     app.redis = Redis.from_url(app.config['REDIS_URL'])
     app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
-    app.fernet = Fernet(app.config['IMAGE_NAME_KEY'])
+    ikey = app.config['IMAGE_NAME_KEY'].encode()
+    app.fernet = Fernet(ikey)
 
     if not babel.locale_selector_func:
         @babel.localeselector

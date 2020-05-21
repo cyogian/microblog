@@ -1,4 +1,4 @@
-from flask import url_for
+from flask import url_for, current_app, safe_join, send_file, send_from_directory
 from random import randint
 import re
 from .errors import bad_request, error_response
@@ -9,6 +9,8 @@ from ..models import User, Post, TempEmailChange, TempEmailVerify
 from .auth import token_auth
 from .email import change_email_otp_email, create_user_otp_email, forgot_password_otp_email
 from datetime import datetime, timedelta
+import pathlib
+import os
 
 email_regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
 
@@ -502,10 +504,23 @@ def duplicate_check():
     return jsonify(response)
 
 
-@bp.route('/get_image', methods=['GET'])
-@token_auth.login_required
+@bp.route('/get_image')
 def get_image():
-    filename = request.args.get('filename')
+    uid = request.args.get('uid', None)
+    upload_folder = current_app.config["UPLOAD_FOLDER"]
+    small = request.args.get('small', 0, int)
+    user = User.get_user(uid)
+    isSmall = True if small == 1 else False
+    if user:
+        fname = upload_folder + user.filename(small=isSmall)
+        try:
+            return send_file(fname, mimetype="image/gif")
+        except:
+            size = "small" if isSmall else "big"
+            dfname = upload_folder + size+"_default.jpg"
+            return send_file(dfname, mimetype="image/gif")
+    else:
+        return bad_request("Invalid uid")
 
 
 # @bp.route('/users/image_upload', methods=['POST'])
