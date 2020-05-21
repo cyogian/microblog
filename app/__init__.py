@@ -14,7 +14,7 @@ from elasticsearch import Elasticsearch
 from redis import Redis
 import rq
 from flask_cors import CORS
-from cryptography.fernet import Fernet
+from .fernet import Fernet
 
 db = SQLAlchemy()                # flask-sqlalchemy : db-connector instance
 migrate = Migrate()          # flask-migrate : db migration engine

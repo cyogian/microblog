@@ -13,6 +13,7 @@ import pathlib
 import os
 
 email_regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png"]
 
 
 @bp.route('/users/current', methods=['GET'])
@@ -507,22 +508,17 @@ def duplicate_check():
 @bp.route('/get_image')
 def get_image():
     uid = request.args.get('uid', None)
-    upload_folder = current_app.config["UPLOAD_FOLDER"]
+    UPLOAD_FOLDER = current_app.config["UPLOAD_FOLDER"]
     small = request.args.get('small', 0, int)
     user = User.get_user(uid)
     isSmall = True if small == 1 else False
     if user:
-        fname = upload_folder + user.filename(small=isSmall)
+        fname = UPLOAD_FOLDER + user.filename(small=isSmall)
         try:
             return send_file(fname, mimetype="image/gif")
         except:
             size = "small" if isSmall else "big"
-            dfname = upload_folder + size+"_default.jpg"
+            dfname = UPLOAD_FOLDER + size+"_default.jpg"
             return send_file(dfname, mimetype="image/gif")
     else:
         return bad_request("Invalid uid")
-
-
-# @bp.route('/users/image_upload', methods=['POST'])
-# @token_auth.login_required
-# def image_upload():
