@@ -550,9 +550,9 @@ def upload_image():
                 "app/", current_app.config['UPLOAD_FOLDER'], small))
             im_big.save(os.path.join(
                 "app/", current_app.config['UPLOAD_FOLDER'], big))
-            user.changed = 1 - user.changed
+            user.changed = 1 + user.changed
             db.session.commit()
-            response = jsonify({'success': True, 'url': user.avatar(False)})
+            response = jsonify({'success': True, 'userData': user.to_dict()})
             response.status_code = 201
             return response
         except Exception as e:

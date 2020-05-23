@@ -3,3 +3,4 @@ venv
 app.db
 additional_config.env
 logs
+app/uploads/*
