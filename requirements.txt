@@ -29,6 +29,7 @@ lazy-object-proxy==1.4.2
 Mako==1.1.0
 MarkupSafe==1.1.1
 mccabe==0.6.1
+Pillow==7.1.2
 pycodestyle==2.5.0
 pycparser==2.19
 Pygments==2.5.2

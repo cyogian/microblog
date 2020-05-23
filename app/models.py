@@ -87,6 +87,7 @@ class PaginatedAPIMixin(object):
 
 class User(PaginatedAPIMixin, UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    changed = db.Column(db.Integer, default=1)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
@@ -199,7 +200,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         url = url_for('api.get_image')
         isSmall = 1 if small else 0
         uid = self.get_uid()
-        return f'{current_app.config["BASE_URL"]}{url}?uid={uid}&small={isSmall}'
+        return f'{current_app.config["BASE_URL"]}{url}?uid={uid}&small={isSmall}&changed={self.changed}'
 
     def filename(self, small=False):
         fname = ""

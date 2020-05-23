@@ -1,4 +1,4 @@
-from flask import url_for, current_app, safe_join, send_file, send_from_directory
+from flask import url_for, current_app, safe_join, send_file
 from random import randint
 import re
 from .errors import bad_request, error_response
@@ -9,11 +9,16 @@ from ..models import User, Post, TempEmailChange, TempEmailVerify
 from .auth import token_auth
 from .email import change_email_otp_email, create_user_otp_email, forgot_password_otp_email
 from datetime import datetime, timedelta
-import pathlib
+from PIL import Image
 import os
 
 email_regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
 ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png"]
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @bp.route('/users/current', methods=['GET'])
@@ -522,3 +527,35 @@ def get_image():
             return send_file(dfname, mimetype="image/gif")
     else:
         return bad_request("Invalid uid")
+
+
+@bp.route('/users/upload_image', methods=["POST"])
+@token_auth.login_required
+def upload_image():
+    user = g.current_user
+    if 'image' not in request.files:
+        return bad_request('No image part')
+    f = request.files['image']
+    if f.filename == '':
+        return bad_request('No image selected')
+    if f and allowed_file(f.filename):
+        try:
+            im = Image.open(f)
+            im = im.convert('RGB')
+            small = user.filename(True)
+            big = user.filename(False)
+            im_small = im.resize((128, 128))
+            im_big = im.resize((300, 300))
+            im_small.save(os.path.join(
+                "app/", current_app.config['UPLOAD_FOLDER'], small))
+            im_big.save(os.path.join(
+                "app/", current_app.config['UPLOAD_FOLDER'], big))
+            user.changed = 1 - user.changed
+            db.session.commit()
+            response = jsonify({'success': True, 'url': user.avatar(False)})
+            response.status_code = 201
+            return response
+        except Exception as e:
+            print(e)
+            return bad_request("Invalid Image")
+    return bad_request("Invalid File")

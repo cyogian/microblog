@@ -24,3 +24,4 @@ class Config(object):
     IMAGE_NAME_KEY = os.environ.get('IMAGE_NAME_KEY')
     UPLOAD_FOLDER = "uploads/"
     BASE_URL = os.environ.get("BASE_URL")
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
