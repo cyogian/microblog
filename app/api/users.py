@@ -540,7 +540,9 @@ def upload_image():
         return bad_request('No image selected')
     if f and allowed_file(f.filename):
         try:
-            im = Image.open(f)
+            image = Image.open(f)
+            im = Image.new("RGBA", image.size, "WHITE")
+            im.paste(image, (0, 0), image)
             im = im.convert('RGB')
             small = user.filename(True)
             big = user.filename(False)
