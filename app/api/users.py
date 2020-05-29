@@ -209,6 +209,7 @@ def verify_create():
                                 return bad_request("password should be longer than 8 characters")
                             user = User()
                             user.from_dict(user_data, new_user=True)
+                            user.is_verified = True
                             db.session.add(user)
                             db.session.commit()
                             response = jsonify(user.to_dict())

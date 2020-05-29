@@ -25,12 +25,14 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)
-    return render_template("login.html", title=_l("Sign In"), form = form)
+    return render_template("login.html", title=_l("Sign In"), form=form)
+
 
 @bp.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -47,8 +49,8 @@ def register():
         return redirect(url_for('auth.login'))
     return render_template("register.html", title=_l("Register"), form=form)
 
-@bp.route('/email_verification_prompt', methods=["GET", "POST"])
 
+@bp.route('/email_verification_prompt', methods=["GET", "POST"])
 @login_required
 def email_verification_prompt():
     if current_user.is_verified:
@@ -59,7 +61,8 @@ def email_verification_prompt():
         flash(_("An email containing the verification link has been sent to the email associated with this account."))
         return redirect(url_for("auth.email_verification_prompt"))
     return render_template("email_verification_prompt.html", title=_l("Verify Your Account"), form=form)
-    
+
+
 @bp.route('/verify_email/<token>')
 def verify_email(token):
     if current_user.is_authenticated:
@@ -75,7 +78,7 @@ def verify_email(token):
             flash(_("Your account is successfully verified."))
             return redirect(url_for("main.index"))
         return redirect(url_for("main.index"))
-        
+
     user = User.verify_email_verification_token(token)
     if not user:
         return redirect(url_for("main.index"))
@@ -85,8 +88,7 @@ def verify_email(token):
     db.session.commit()
     flash(_("Your account is successfully verified. Login to continue."))
     return redirect(url_for("auth.login"))
-       
-        
+
 
 @bp.route('/reset_password_request', methods=["GET", "POST"])
 def reset_password_request():
@@ -100,6 +102,7 @@ def reset_password_request():
         flash(_("Check your email for the instructions to reset your password."))
         return redirect(url_for("auth.login"))
     return render_template("reset_password_request.html", title=_l("Reset Password"), form=form)
+
 
 @bp.route('/reset_password/<token>', methods=["GET", "POST"])
 def reset_password(token):
