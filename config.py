@@ -22,6 +22,7 @@ class Config(object):
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     IMAGE_NAME_KEY = os.environ.get('IMAGE_NAME_KEY')
+    CLEANUP_KEY = os.environ.get("CLEANUP_KEY")
     UPLOAD_FOLDER = "uploads/"
     BASE_URL = os.environ.get("BASE_URL")
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024

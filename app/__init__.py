@@ -14,6 +14,7 @@ from elasticsearch import Elasticsearch
 from redis import Redis
 import rq
 from flask_cors import CORS
+from flask_executor import Executor
 from .fernet import Fernet
 
 db = SQLAlchemy()                # flask-sqlalchemy : db-connector instance
@@ -25,6 +26,7 @@ login.login_message = _l("Please login to access this page.")
 mail = Mail()
 moment = Moment()
 babel = Babel()
+executor = Executor()
 
 
 def create_app(config_class=Config):
@@ -39,6 +41,7 @@ def create_app(config_class=Config):
     mail.init_app(app)
     moment.init_app(app)
     babel.init_app(app)
+    executor.init_app(app)
 
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
