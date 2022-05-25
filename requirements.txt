@@ -37,7 +37,7 @@ psycopg2-binary==2.8.5
 pycodestyle==2.6.0
 pycparser==2.20
 Pygments==2.6.1
-PyJWT==1.7.1
+PyJWT==2.4.0
 pylint==2.5.2
 pylint-plugin-utils==0.6
 PyMySQL==0.9.3
